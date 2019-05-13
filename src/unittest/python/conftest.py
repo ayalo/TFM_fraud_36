@@ -1,5 +1,3 @@
-
-
 import logging
 
 import pytest
@@ -23,3 +21,7 @@ def spark_session(request):
 
     quiet_py4j()
     return spark
+
+#meter aqui llamadas a los Test propios
+#referencia clara : https://www.tutorialspoint.com/pytest/pytest_conftest_py.htm
+#otras : https://docs.pytest.org/en/latest/example/simple.html

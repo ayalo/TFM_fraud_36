@@ -57,8 +57,26 @@ g.edges.show()
 ## Check the number of edges of each vertex
 g.degrees.show()
 
+g.vertices.filter("age > 30").show()
+g.inDegrees.filter("inDegree >= 2").sort("inDegree", ascending=False).show()
+g.edges.filter('type == "friend"')
 
+spark.sparkContext.setCheckpointDir('graphframes_cps')
 
+g.connectedComponents().show()
+
+g.find("(a)-[e]->(b); (b)-[e2]->(a)").show()
+
+mutualFriends = g.find("(a)-[]->(b); (b)-[]->(c); (c)-[]->(b); (b)-[]->(a)")\
+    .dropDuplicates()
+
+mutualFriends.filter('a.id == 2 and c.id == 3').show()
+
+pr = g.pageRank(resetProbability=0.15, tol=0.01)
+## look at the pagerank score for every vertex
+pr.vertices.show()
+## look at the weight of every edge
+pr.edges.show()
 ##...........................................................................
 ## para arreglar BUG https://github.com/matplotlib/matplotlib/issues/13414
 ## $ mkdir -p ~/.matplotlib

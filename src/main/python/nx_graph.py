@@ -1,6 +1,7 @@
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
+#https://stackoverflow.com/questions/30850688/construct-bipartite-graph-from-columns-of-python-dataframe
 
 df = pd.DataFrame(
     {'IP': ['10.20.30.40',

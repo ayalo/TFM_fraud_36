@@ -26,6 +26,8 @@ def domain_cleaner(domain):
         print ("domain_cleaner -- return : "+ cleaned_domain)
 
         return cleaned_domain
+#print ("prueba get_tld")
+#print (""+get_tld( "http://www.google.co.uk" ))
 
 def delete_ini(text, subString):
     print ("delete_ini -- subString : "+ subString)
