@@ -128,6 +128,8 @@ def main():
     df_motifs_count= rdd_count_motifs.toDF( ["id","c", "count_ips_in_common", "total_ips_in_common"] )
     df_motifs_count.show()
 
+
+
     print( "- df_degreeRatio : " )
     df_degreeRatio = df_motifs_count.join( outDeg, df_motifs_count.select(id) = outDeg.select('id'))
         #.selectExpr( "id","double(total_ips_in_common)/double(outDegree) as degreeRatio" )
