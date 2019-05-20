@@ -43,14 +43,14 @@ def main():
     #sqlContext = SQLContext( spark )
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame( data )
-    print (" Pintamos Dataframe completo :")
-    df.show()
+    #print (" Pintamos Dataframe completo :")
+    #df.show()
 # Crear funcion Dataframe Domain-IPs
     df_dom = df.select( "domain" )
     df_ip = df.select( "IP" )
     df_vertices = df_dom.union( df_ip )
-    print (" Pintamos Dataframe vertices :")
-    df_vertices.show()
+    #print (" Pintamos Dataframe vertices :")
+    #df_vertices.show()
     # renombramos columna 'domain' para que graphframes encuentre columna 'id' y pueda crear el grafo.
     df_vertices = (df_vertices
                 .withColumnRenamed( "domain", "id" ))
@@ -76,16 +76,16 @@ def main():
 
     ##EN EL SIGUIENTE CREO QUE SI TUVIERA MAS CAMPOS EL DF, AL HACER EL GROUPBY LOS ELIMINO, PREG LUIS
     df_count_domain_ips = df.select("domain","IP").groupBy("domain").agg(F.collect_list(F.col("IP")).alias("IP_list"))
-    print( " Pintamos DF df_count_domain_ips.show :" )
-    df_count_domain_ips.show()
+    #print( " Pintamos DF df_count_domain_ips.show :" )
+    #df_count_domain_ips.show()
     rdd_count_domain_ips = df_count_domain_ips.rdd.map(lambda x:(x.domain,x.IP_list,len(x.IP_list)))
     df_count_domain_ips=rdd_count_domain_ips.toDF(["domain", "IP_list", "total_links"]) #--> Tabla domain-ip-total_visitas
 
-    print( " Pintamos DF df_count_domain_ips.show :" )
-    df_count_domain_ips.show(5,False)
+    #print( " Pintamos DF df_count_domain_ips.show :" )
+    #df_count_domain_ips.show(5,False)
     df_edges=df.groupBy("domain","IP").count()
-    print( " Pintamos DF df_edges.show :" )
-    df_edges.show()
+    #print( " Pintamos DF df_edges.show :" )
+    #df_edges.show()
 
     df_edges= (df_edges
             .withColumnRenamed("domain","src")
@@ -99,18 +99,19 @@ def main():
     print("Creamos GraphFrame -- ")
     ##g = GraphFrame(df_vertices_index, df_edges) # de cuando añadiamos columna 'id'  y no renombrabamos 'domain'
     g = GraphFrame(df_vertices, df_edges)
-    print("Pasa de GrapFrame- Pintamos g.vertices : ")
-    g.vertices.show()
-    print("- Pintamos g.edges : ")
-    g.edges.show()
-    print ("Check the number of edges of each vertex")
-    g.degrees.show()
-    print ("Check the in-degrees")
+    #print("Pasa de GrapFrame- Pintamos g.vertices : ")
+    #g.vertices.show()
+    #print("- Pintamos g.edges : ")
+    #g.edges.show()
+    #print ("Check the number of edges of each vertex")
+    #g.degrees.show()
+    #print ("Check the in-degrees")
     inDeg = g.inDegrees
-    inDeg.orderBy(F.desc( "inDegree" )).show(5,False)
-    print("Check thte out-degrees")
+    #inDeg.orderBy(F.desc( "inDegree" )).show(5,False)
+    print("Check the out-degrees")
     outDeg = g.outDegrees
     outDeg.orderBy(F.desc( "outDegree" ) ).show(5,False)
+    outDeg.explain()
 
     print ("Show only connected components")
     spark.sparkContext.setCheckpointDir( 'prueba_graphframes_cps' )
@@ -118,23 +119,30 @@ def main():
 
     # Query Graph para obtener interseccion de IPs visitadas por 2 dominios distintos
     df_motifs=g.find( "(a)-[]->(b); (c)-[]->(b)" ).filter("a != c").dropDuplicates(['b'])
-    df_motifs.show(300, False)
+    #df_motifs.show(300, False)
 
     df_motifs_count_ips_common = df_motifs.groupBy('a','c').agg(F.collect_list(F.col("b")).alias("count_ips_in_common"))
     print("- motifs_count : ")
-    df_motifs_count_ips_common.show(4,False)
+    #df_motifs_count_ips_common.show(4,False)
 
-    rdd_count_motifs = df_motifs_count_ips_common.rdd.map( lambda x: (x.a, x.c, x.count_ips_in_common, len(x.count_ips_in_common)) )
+    rdd_count_motifs = df_motifs_count_ips_common.rdd.map( lambda x: (x.a, x.c, x.count_ips_in_common, len(x.count_ips_in_common)))
+
     df_motifs_count= rdd_count_motifs.toDF( ["id","c", "count_ips_in_common", "total_ips_in_common"] )
-    df_motifs_count.show()
+    #df_motifs_count=df_motifs_count.withColumn('id',df_motifs_count.id.cast("string"))
+    #print( "- motifs_count after casting  : " )
+    df_motifs_count.show(10,False)
+    df_motifs.explain()
 
-
-
-    print( "- df_degreeRatio : " )
-    df_degreeRatio = df_motifs_count.join( outDeg, df_motifs_count.select(id) = outDeg.select('id'))
-        #.selectExpr( "id","double(total_ips_in_common)/double(outDegree) as degreeRatio" )
+    # intento de union entre motifs y outdegree con la intencion de solo quedarnos con un edge entre nodos ( el de mayor outdegree)
+    # nueva idea, saco ambos puesto que si la division da <0.5 no existe edge en esa direccion
+    #print( "- df_degreeRatio : " )
+    df_degreeRatio = df_motifs_count.join( outDeg, 'id')
+    #df_degreeRatio = df_motifs_count.join( outDeg, df_motifs_count.select(id) = outDeg.select('id'))
+    #.selectExpr( "id","double(total_ips_in_common)/double(outDegree) as degreeRatio" )
     #df_degreeRatio.orderBy( F.desc( "degreeRatio" ) ).show( 10, False )
-    df_degreeRatio.show(10,False)
+    #df_degreeRatio.show(10,False)
+
+
 
 
     ## Crear funcion Pinta GrapFrame
