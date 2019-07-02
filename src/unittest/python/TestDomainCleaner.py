@@ -17,6 +17,8 @@ class TestDomainCleaner(unittest.TestCase):
         self.assertEqual(res,'apalon.myclockfree')
         res = domain_cleaner("com.https://www.'\x00\x11Hello'flash.comlight.brightest.BEACON'\x00\x11Hello'conQUESO437364525289.torch.comr")
         self.assertEqual(res,'helloflash.comlight.brightest.beaconhelloconqueso437364525289.torch.comr')
+        res = domain_cleaner("com.com.otracoasa.com.helloflash.com/light.brightest/.beaconhelloconqueso437364525289.torch.comr")
+        self.assertEqual(res,'helloflash.com')
         res = domain_cleaner("1564646165")
         self.assertEqual(res,'1564646165')
         res = domain_cleaner('498464684')
@@ -26,7 +28,11 @@ class TestDomainCleaner(unittest.TestCase):
         res = domain_cleaner('www.mainDomain111/domain2/domain3.com')
         self.assertEqual(res,'maindomain111')
         res = domain_cleaner("com.com.otracoasa.com.https://www.'\x00\x11Hello'flash.com/light.brightest/.BEACON'\x00\x11Hello'")
-        self.assertEqual(res,'otracoasa.com.helloflash.com')
+        self.assertEqual(res,'helloflash.com')
+        res = domain_cleaner("http://hello.domain.com")
+        self.assertEqual(res,'domain.com')
+
+
 
 if __name__ == '__main__':
     unittest.main()

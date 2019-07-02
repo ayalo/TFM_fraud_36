@@ -24,6 +24,8 @@ class TestIpCleaner(unittest.TestCase):
         self.assertEqual(res,'Format not valid: 178.23.5.34.7')
         res = ip_cleaner( "holacaracola" )
         self.assertEqual(res,'Format not valid: holacaracola')
+        res = ip_cleaner('')
+        self.assertEqual(res,'Format not valid: ')
 
 if __name__ == '__main__':
     unittest.main()

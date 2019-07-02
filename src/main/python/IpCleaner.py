@@ -14,12 +14,13 @@ def ip_cleaner(ip):
         # return cleaned_ip
 
 def valid_ip(ip):
-    part = ip.split( '.' )
-    if len( part ) != 4: return False
+    part = ip.split('.')
+    if len(part) != 4: return False
     try:
-        return all( 0 <= int( p ) < 256 for p in part )
+        return all(0 <= int(p) < 256 for p in part)
     except ValueError:
         return False
+
 
 def main(i):
     print ("cleaned_domain : "+ip_cleaner(i))

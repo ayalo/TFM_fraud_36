@@ -47,6 +47,7 @@ def main():
     df = spark.createDataFrame( data )
     print (" Pintamos Dataframe completo :")
     df.show()
+
 # Crear funcion Dataframe Domain-IPs
     df_dom = df.select( "domain" )
     df_ip = df.select( "IP" )
@@ -131,12 +132,16 @@ def main():
 
 
     df_motifs_count_ips_common = df_motifs.groupBy('a','c').agg(F.collect_list(F.col("b")).alias("count_ips_in_common"))
+    ####df_motifs_count_ips_common = df_motifs.groupBy('a','c').count()
     print("- motifs_count : ")
-    df_motifs_count_ips_common.show(4,False)
+    ####df_motifs_count_ips_common.show(4,False)
+    print( df_motifs_count_ips_common.schema )
 
     rdd_count_motifs = df_motifs_count_ips_common.rdd.map( lambda x: (x.a, x.c, x.count_ips_in_common, len(x.count_ips_in_common)))
-
     df_motifs_count= rdd_count_motifs.toDF( ["id","c", "count_ips_in_common", "total_ips_in_common"] )
+
+    df_prueba=df_motifs_count_ips_common.join(outDeg,df_motifs_count_ips_common.a.id==outDeg.id)
+    df_prueba.show()
     #df_motifs_count=df_motifs_count.withColumn('id',df_motifs_count.id.cast("string"))
     #print( "- motifs_count after casting  : " )
     var = df_motifs_count.select( "id" ).collect()

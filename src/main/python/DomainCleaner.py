@@ -1,6 +1,7 @@
 import sys
 import re
 import string
+from tld import get_fld
 
 def domain_cleaner(domain):
         """
@@ -12,23 +13,34 @@ def domain_cleaner(domain):
         """
 
         dirty_string= re.sub("www.|.www|https:\/\/|http:\/\/|\"|\'", "", domain).lower()
-        #if domain.isdigit():
-        #    return domain
-        #if dirty_string.startswith(("com.", ".", ".com")):
-        #   dirty_string.split('&', 1)[0]
-        dirty_string=delete_ini(dirty_string,"com.")
-        print ("domain_cleaner -- dirty_string : "+dirty_string)
+        if domain.isdigit():
+            return domain
 
         clean_string =  ''.join(filter(lambda x: x in string.printable, dirty_string)) ## only printable characters
-        #print ("domain_cleaner -- domain_cleaner -- clean_string : "+clean_string)
+        print ("domain_cleaner -- domain_cleaner -- clean_string : "+clean_string)
 
-        cleaned_domain=clean_string.split('/',1)[0]## only the main_domain
-        print ("domain_cleaner -- return : "+ cleaned_domain)
+        dirty_string=clean_string.split('/',1)[0]## only the main_domain
+        print ("domain_cleaner -- return : "+ dirty_string)
 
-        return cleaned_domain
-#print ("prueba get_tld")
-#print (""+get_tld( "http://www.google.co.uk" ))
 
+        cleaned_domain = delete_ini( dirty_string, "com." )
+        print( "domain_cleaner -- dirty_string : " + cleaned_domain )
+
+        #print( get_fld( "http://www.google.co.uk" ) )
+        #cleaned_root_domain = get_fld( "http://" + cleaned_domain )
+        #print( "cleaned_domain : "+cleaned_root_domain)
+
+        try:
+            print ("get_fld http -- " )
+            get_fld("http://" + cleaned_domain)
+            return get_fld("http://" + cleaned_domain )
+        except:
+            print ("get_fld except --" +cleaned_domain)
+            return cleaned_domain
+
+
+
+# funcion para eliminar el inicio de un string recursivamente, por ejemplo si comienza por com.com.com.google.es, nos quedamos con google.es
 def delete_ini(text, subString):
     print ("delete_ini -- subString : "+ subString)
     print ("delete_ini -- text : "+ text)
