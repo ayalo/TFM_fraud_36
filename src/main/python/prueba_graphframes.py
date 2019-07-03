@@ -125,6 +125,7 @@ def main():
 
     # Query Graph para obtener interseccion de IPs visitadas por 2 dominios distintos
     df_motifs=g.find( "(a)-[e]->(b); (c)-[e2]->(b)" ).filter("a != c").dropDuplicates(['e','e2'])
+    # si no quitaramos los duplicados podria cogerse como un grado para despues ver el numero de visitas a una misma ip de un mismo dominio
     print( "- motifs find grafo : " )
     df_motifs.show(300, False)
     print (df_motifs.schema)
@@ -141,6 +142,7 @@ def main():
     df_motifs_count= rdd_count_motifs.toDF( ["id","c", "count_ips_in_common", "total_ips_in_common"] )
 
     df_prueba=df_motifs_count_ips_common.join(outDeg,df_motifs_count_ips_common.a.id==outDeg.id)
+    print ("--> df_prueba : --")
     df_prueba.show()
     #df_motifs_count=df_motifs_count.withColumn('id',df_motifs_count.id.cast("string"))
     #print( "- motifs_count after casting  : " )
@@ -162,7 +164,7 @@ def main():
     df_degree_ratio.show(10,False)
 
     print( "pintamos var2 :" )
-    var2 = df_degree_ratio.id.id.collect()
+    var2 = df_degree_ratio.id.collect()
     print( var2 )
 
     # df_edges_DD :src dst edge_ratio
