@@ -10,10 +10,11 @@ def ip_cleaner(ip):
         """
         if valid_ip(ip): return ip
 
-        return "Format not valid: " +ip
+        return "Format not valid"
         # return cleaned_ip
 
 def valid_ip(ip):
+    if ip is None: return False
     part = ip.split('.')
     if len(part) != 4: return False
     try:

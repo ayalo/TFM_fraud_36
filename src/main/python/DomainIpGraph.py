@@ -11,7 +11,12 @@ from igraph import *
 import networkx as nx
 import matplotlib.pyplot as plt
 
-import zipfile
+from src.main.python.DomainCleaner import domain_cleaner
+from src.main.python.IpCleaner import ip_cleaner
+
+from pyspark.sql.functions import udf
+from pyspark.sql import functions as F
+from pyspark.sql.types import *
 
 
 def get_vertices(df):
@@ -145,6 +150,32 @@ def draw_nx (df_edges):
 
     plt.show()
 
+def clean(df):
+    df_dropna = df.dropna( subset=('user_ip', 'referrer_domain') )
+    #df_dropna.head()
+
+    # Añado una columna mas al df_current con el user_ip normalizado : ip_cleaned
+    # Añado una columna mas al df_current con el referrer_domain normalizado : domain_cleaned
+
+    udf_ipcleaner = udf( ip_cleaner, StringType() )
+    udf_domaincleaner = udf( domain_cleaner, StringType() )
+
+    print( "Calculando df_cleaned_ip" )
+    df_cleaned_ip = df_dropna.withColumn( 'ip_cleaned', udf_ipcleaner( df.user_ip ) )
+    df_cleaned_ip.select( "referrer_domain" ).count()
+    #df_cleaned_ip.head()
+
+    df_cleaned = df_cleaned_ip.withColumn( 'domain_cleaned', udf_domaincleaner( df_cleaned_ip.referrer_domain ) )
+    df_cleaned.select( "referrer_domain" ).count()
+    #df_cleaned.head()
+
+    df_cleaned_dropna = df_cleaned.dropna( subset=('user_ip', 'referrer_domain', 'ip_cleaned', 'domain_cleaned') )
+
+    ## DROP/Filter Format not valid in ip_cleaned
+    df_cleaned_format = df_cleaned_dropna.filter( (df.ip_cleaned != 'Format not valid') )
+
+
+    return df_cleaned_format
 
 def main():
     '''Program entry point
@@ -183,18 +214,19 @@ def main():
                     '30.50.70.90']})
              #'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
     spark = SparkSession.builder.getOrCreate()
-    #df = spark.createDataFrame( data )
-    #df = spark.read.csv("file.csv.gz", sep='\t')
-    #df = spark.read.format("csv").option("header", 'true').option("delimiter", '|').load("/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz")
-   # zf = zipfile.ZipFile( '/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz' )  # having First.csv zipped file.
-   # df = pd.read_csv( zf.open( 'ssp_bid_compressed_000000000499.csv' ) )
+    ####df = spark.createDataFrame( data )
     df = spark.read.format("csv").option("header", 'true').option("delimiter", ',').load("/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz")
 
 
     print (" Pintamos Dataframe completo :")
-    df.head(4)
+    df.show()
 
+    df=clean(df)
 
+    print("cleaned df :")
+    df.show()
+
+    print ("get graph DI : ")
     gf=get_graph_DI( df )
     print( "MAIN -- gf -- Check the number of edges of each vertex" )
     gf.degrees.show()
