@@ -227,7 +227,7 @@ def main():
     df.show()
 
     print ("get graph DI : ")
-    gf=get_graph_DI( df )
+    gf=get_graph_DI( df )G
     print( "MAIN -- gf -- Check the number of edges of each vertex" )
     gf.degrees.show()
 
