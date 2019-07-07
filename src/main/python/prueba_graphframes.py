@@ -139,18 +139,20 @@ def main():
     print( df_motifs_count_ips_common.schema )
 
     rdd_count_motifs = df_motifs_count_ips_common.rdd.map( lambda x: (x.a, x.c, x.count_ips_in_common, len(x.count_ips_in_common)))
-    df_motifs_count= rdd_count_motifs.toDF( ["id","c", "count_ips_in_common", "total_ips_in_common"] )
+    df_motifs_count= rdd_count_motifs.toDF( ["id","c", "count_ips_in_common", "total_ips_in_common"] ) ##· <- Puede ser aqui
+    # donde hago un array de array structura dentro de estructura
+    # revisar , que añado 3 columnas y no solo 1
 
     df_prueba=df_motifs_count_ips_common.join(outDeg,df_motifs_count_ips_common.a.id==outDeg.id)
     print ("--> df_prueba : --")
     df_prueba.show()
     #df_motifs_count=df_motifs_count.withColumn('id',df_motifs_count.id.cast("string"))
     #print( "- motifs_count after casting  : " )
-    var = df_motifs_count.select( "id" ).collect()
-    print ("pintamos var :")
-    print (var)
-    df_motifs_count.show(10,False)
-    print (df_motifs_count.schema)
+    ##var = df_motifs_count.select( "id" ).collect()
+    ##print ("pintamos var :")
+    ##print (var)
+    ##df_motifs_count.show(10,False)
+    ##print (df_motifs_count.schema)
 
     # intento de union entre motifs y outdegree con la intencion de solo quedarnos con un edge entre nodos ( el de mayor outdegree)
     # nueva idea, saco ambos puesto que si la division da <0.5 no existe edge en esa direccion
@@ -163,13 +165,13 @@ def main():
     print( "- df_degreeRatio division: " )
     df_degree_ratio.show(10,False)
 
-    print( "pintamos var2 :" )
-    var2 = df_degree_ratio.id.collect()
-    print( var2 )
+    #print( "pintamos var2 :" )
+    #var2 = df_degree_ratio.id.collect()
+    #print( var2 )
 
     # df_edges_DD :src dst edge_ratio
-    df_edges_DD_exists=df_degree_ratio.select(df_degree_ratio.id.id, df_degree_ratio.c,
-                                              F.when(df_degree_ratio['edge_ratio'] > 0.5,1).otherwise(0)).show()
+#    df_edges_DD_exists=df_degree_ratio.select(df_degree_ratio.id.id, df_degree_ratio.c,
+#                                              F.when(df_degree_ratio['edge_ratio'] > 0.5,1).otherwise(0)).show()
 
     #df_degreeRatio2 = df_motifs_count.join( outDeg, df_motifs_count.id.id==outDeg.id)\
     #    .selectExpr( "id.id","double(total_ips_in_common)/double(outDegree) as degreeRatio" )

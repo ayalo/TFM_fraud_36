@@ -2,20 +2,115 @@ from pyspark.sql import functions as F
 from pyspark.sql import SparkSession
 import pandas as pd
 from graphframes import *
-from graphframes.examples import Graphs
-from igraph import *
-from pyspark.sql.functions import *
 
+from igraph import *
 import networkx as nx
 import matplotlib.pyplot as plt
-from src.main.python.DomainIpGraph import *
 
+from src.main.python.DomainIpGraph import get_graph_DI
+
+def get_graph(df):
+    """
+    Get GraphFrame to draw a bipartite graph
+    :param df dataframe from our data. Idem format like in get_vertices function.
+    :return: gf (GraphFrame graph)
+
+    :definition df_vertices: vertices for the graphframe : domains
+    :definition df_edges: links between them
+    """
+
+    df_vertices=get_vertices(df)
+    df_edges=get_edges(df)
+
+    print("MAIN -- df_vertices: --")
+    df_vertices.show()
+    print("MAIN -- df_edges: --")
+    df_edges.show()
+
+    ## Generar funcion Crea GraphFrame
+    print("Creamos GraphFrame -- ")
+    ##g = GraphFrame(df_vertices_index, df_edges) # de cuando añadiamos columna 'id'  y no renombrabamos 'domain'
+    gf = GraphFrame(df_vertices, df_edges)
+
+    return gf
+
+def draw_igraph(g):
+    """
+    :param g:
+    :return:
+    """
+    ig = Graph.TupleList( g.edges.collect(), directed=True )
+    plot( ig )
+
+
+def draw_nx (df_edges):
+    """
+
+    :param df_edges: df_edges from a GraphFrame
+    :return:
+    """
+
+    df = df_edges.toPandas()  ##GUARRADA
+
+    B = nx.Graph()
+    print ( "draw -- despues nx.Graph()")
+
+    B.add_nodes_from(df['src'], bipartite=1)
+    print ( "draw -- despues add_nodes_from src")
+
+    B.add_nodes_from(df['dst'], bipartite=0)
+    print ( "draw -- despues add_nodes_from dst")
+    B.add_weighted_edges_from(
+        [(row['src'], row['dst'], 1) for idx, row in df.iterrows()],
+        weight='weight')
+    print ( "draw -- Nodes added to B")
+
+    print(B.edges(data=True))
+    # [('test1', 'example.org', {'weight': 1}), ('test3', 'example.org', {'weight': 1}), ('test2', 'example.org', {'weight': 1}),
+    # ('website.com', 'else', {'weight': 1}), ('site.com', 'something', {'weight': 1})]
+
+    pos = {node:[0, i] for i,node in enumerate(df['src'])}
+    pos.update({node:[1, i] for i,node in enumerate(df['dst'])})
+    nx.draw(B, pos, with_labels=False)
+    for p in pos:  # raise text positions
+        pos[p][1] += 0.25
+    nx.draw_networkx_labels(B, pos)
+
+    plt.show()
+
+def get_vertices(df):
+    """
+    Creating a df_vertices to use GrapFrames
+    :param df:
+    :return: df_vertices
+
+    """
+    df_vertices=df.select( "a" ).toDF("id")
+    print( "df_vertices.show --- renamed" )
+    df_vertices.show()
+
+    return df_vertices
+
+def get_edges(df):
+    """
+    Creating a df_edges to use GraphFrames
+    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :return: df_edges
+    """
+
+    df_edges_DD_exists = df.select( df.a.id, df.c,
+                                                 F.when( df['edge_ratio'] > 0.5, 1 ).otherwise( 0 ) )  # .show()
+    df_edges=df_edges_DD_exists.toDF("src","dst","edge_weight")
+
+    print( "df_edges.show -- renamed" )
+    df_edges.show()
+
+    return df_edges
 
 def main():
     '''Program entry point'''
 
     # Intialize a spark context
-    # with F.SparkContext( "local", "PySparCreateDataframe" ) as spark:
     data = pd.DataFrame(
             {'referrer_domain': ['example.org',
                         'site.com',
@@ -49,10 +144,11 @@ def main():
     print (" Pintamos Dataframe completo :")
     df.show()
 
-    g= get_graph(df)
+    #g= src.main.python.DomainIpGraph.get_graph(df)
+    g=get_graph_DI(df)
     ###g.triplets.show(100,False)
 
-    # Query Graph para obtener interseccion de IPs visitadas por 2 dominios distintos
+    # Query  DomainIpGraph para obtener interseccion de IPs visitadas por 2 dominios distintos
     df_motifs=g.find( "(a)-[e]->(b); (c)-[e2]->(b)" ).filter("a != c").dropDuplicates(['e','e2'])
 
 
@@ -101,31 +197,40 @@ def main():
 
 
     #df_edges_DD :src dst edge_ratio
-    df_edges_DD_exists=df_degree_ratio.select(df_degree_ratio.a.id, df_degree_ratio.c,
-                                              F.when(df_degree_ratio['edge_ratio'] > 0.5,1).otherwise(0))#.show()
+    #df_edges=get_edges(df_degree_ratio)
+    #df_edges_DD_exists=df_degree_ratio.select(df_degree_ratio.a.id, df_degree_ratio.c,
+    #                                          F.when(df_degree_ratio['edge_ratio'] > 0.5,1).otherwise(0))#.show()
 
     #print( df_edges_DD_exists.show )
     #df_edges_DD_exists.explain() ##BUfF
-    print( "df_edges_DD_exists.show" )
-    df_edges_DD_exists.show()
-    df_edges=df_edges_DD_exists.toDF("src","dst","edge_weight")
+    #print( "df_edges_DD_exists.show" )
+    #df_edges_DD_exists.show()
+
+    #df_edges=df_edges_DD_exists.toDF("src","dst","edge_weight")
     #df_edges = (df_edges_DD_exists
     #            .withColumnRenamed( "a.id", "src" )
     #            .withColumnRenamed( "c", "dst" ))
 
-    print( "df_edges_DD_exists.show---RENAMED" )
-    df_edges.show()
+    #print( "df_edges_DD_exists.show---RENAMED" )
+    #df_edges.show()
 
-    df_vertices_a=df_degree_ratio.select( "a" )
-    df_vertices=df_vertices_a.toDF("id")
+    #df_vertices=get_vertices(df_degree_ratio.select( "a" ))
+    # df_vertices_a=df_degree_ratio.select( "a" )
     #df_vertices = (df_vertices_a
     #            .withColumnRenamed( "a", "id" ))
-    print( "df_vertices.show---renamed" )
-    df_vertices.show()
+    #print( "df_vertices.show---renamed" )
+    #df_vertices.show()
 
-    gf = GraphFrame(df_vertices, df_edges)
-    draw_nx(df_edges)
+    gf = get_graph(df_degree_ratio)
     draw_igraph(gf)
+    draw_nx(get_edges(df_degree_ratio))
 
 if __name__ == "__main__":
     main()
+
+## Preguntar :
+# generar clases DomainDomainGraph y DomainIpGraph para poder compartir metodo que se llame igual get_graph pero llamar desde la primera a
+# el metodo de la segunda clase.
+
+# parte comentada, como renombro la columna count, si no tiene el mismo formato (no es String en un longbyte) para poder meterlo en edges.
+# creo que esa parte es mas eficiente puesto que no necesito tener la lista de ips visitadas por dominio, solo saber cuantas.

@@ -6,11 +6,13 @@ from pyspark.sql import functions as F
 from pyspark.sql import SparkSession
 import pandas as pd
 from graphframes import *
-from graphframes.examples import Graphs
-from igraph import *
 
+from igraph import *
 import networkx as nx
 import matplotlib.pyplot as plt
+
+import zipfile
+
 
 def get_vertices(df):
     """
@@ -33,8 +35,9 @@ def get_vertices(df):
     #print (" Pintamos Dataframe vertices :")
     #df_vertices.show()
     # renombramos columna 'referrer_domain' para que graphframes encuentre columna 'id' y pueda crear el grafo.
-    df_vertices = (df_vertices
-                .withColumnRenamed( "referrer_domain", "id" ))
+    df_vertices=df_vertices.toDF("id")
+    #df_vertices = (df_vertices
+    #            .withColumnRenamed( "referrer_domain", "id" ))
     #print( "- df_vertices.explain()" )
 
     return df_vertices
@@ -59,10 +62,10 @@ def get_edges(df):
     #print( " Pintamos DF df_edges.show :" )
     #df_edges.show()
 
-
-    df_edges= (df_edges
-            .withColumnRenamed("referrer_domain","src")
-            .withColumnRenamed("user_ip","dst"))
+    df_edges=df_edges.toDF("src","dst","edge_weight")
+    #df_edges= (df_edges
+    #        .withColumnRenamed("referrer_domain","src")
+    #        .withColumnRenamed("user_ip","dst"))
     #print( "- df_edges.explain()")
     #df_edges.explain()
 
@@ -71,7 +74,7 @@ def get_edges(df):
 
     return df_edges
 
-def get_graph(df):
+def get_graph_DI(df):
     """
     Get GraphFrame to draw a bipartite graph
     :param df dataframe from our data. Idem format like in get_vertices function.
@@ -180,12 +183,19 @@ def main():
                     '30.50.70.90']})
              #'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
     spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame( data )
+    #df = spark.createDataFrame( data )
+    #df = spark.read.csv("file.csv.gz", sep='\t')
+    #df = spark.read.format("csv").option("header", 'true').option("delimiter", '|').load("/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz")
+   # zf = zipfile.ZipFile( '/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz' )  # having First.csv zipped file.
+   # df = pd.read_csv( zf.open( 'ssp_bid_compressed_000000000499.csv' ) )
+    df = spark.read.format("csv").option("header", 'true').option("delimiter", ',').load("/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz")
+
+
     print (" Pintamos Dataframe completo :")
-    df.show()
+    df.head(4)
 
 
-    gf=get_graph( df )
+    gf=get_graph_DI( df )
     print( "MAIN -- gf -- Check the number of edges of each vertex" )
     gf.degrees.show()
 
