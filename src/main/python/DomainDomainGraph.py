@@ -151,6 +151,9 @@ def main():
     # Query  DomainIpGraph para obtener interseccion de IPs visitadas por 2 dominios distintos
     df_motifs=g.find( "(a)-[e]->(b); (c)-[e2]->(b)" ).filter("a != c").dropDuplicates(['e','e2'])
 
+    df_motifs_count = df_motifs.groupBy( 'a', 'c' ).agg(F.count(F.col("b")).alias("count_ips_in_common"))
+
+    df_motifs_count.show()
 
 #....................... NO VA PERO PARECE MEJOR
 #    df_motifs_count_ips_common= df_motifs.groupBy('a','c').count()
@@ -177,9 +180,9 @@ def main():
 #    df_degree_ratio.show( 10, False )
 #.FIN...................... NO VA PERO PARECE MEJOR
 
-    df_motifs_count_ips_common = df_motifs.groupBy('a','c').agg(F.collect_list(F.col("b")).alias("count_ips_in_common"))
-    rdd_count_motifs = df_motifs_count_ips_common.rdd.map( lambda x: (x.a, x.c, x.count_ips_in_common, len(x.count_ips_in_common)))
-    df_motifs_count= rdd_count_motifs.toDF( ["a","c", "count_ips_in_common", "total_ips_in_common"] ) ##· <- Puede ser aqui
+###    df_motifs_count_ips_common = df_motifs.groupBy('a','c').agg(F.collect_list(F.col("b")).alias("count_ips_in_common"))
+###    rdd_count_motifs = df_motifs_count_ips_common.rdd.map( lambda x: (x.a, x.c, x.count_ips_in_common, len(x.count_ips_in_common)))
+###    df_motifs_count= rdd_count_motifs.toDF( ["a","c", "count_ips_in_common", "total_ips_in_common"] ) ##· <- Puede ser aqui
     outDeg = g.outDegrees
     print ( "- df_motifs_count : " )
     df_motifs.show(6,False)
@@ -190,7 +193,7 @@ def main():
     df_degree.show(10,False)
     print( df_degree.schema )
 
-    df_degree_ratio = df_degree.withColumn( 'edge_ratio', df_degree.total_ips_in_common / df_degree.outDegree )
+    df_degree_ratio = df_degree.withColumn( 'edge_ratio', df_degree.count_ips_in_common / df_degree.outDegree )
     print( "- df_degreeRatio division: " )
     df_degree_ratio.show(10,False)
     print( df_degree_ratio.schema )

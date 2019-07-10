@@ -11,8 +11,8 @@ def domain_cleaner(domain):
         :arg domain : String
         :return: cleaned_domain
         """
-
-        dirty_string= re.sub("www.|.www|https:\/\/|http:\/\/|\"|\'", "", domain).lower()
+        domain=domain.lower()
+        dirty_string= re.sub("www.|.www|https:\/\/|http:\/\/|\"|\'", "", domain)##.lower()
         if domain.isdigit():
             return domain
 
@@ -32,13 +32,17 @@ def domain_cleaner(domain):
 
         try:
             ##print ("get_fld http -- " )
-            get_fld("http://" + cleaned_domain)
+            #get_fld("http://" + cleaned_domain)
             return get_fld("http://" + cleaned_domain )
         except:
             ##print ("get_fld except --" +cleaned_domain)
             return cleaned_domain
 
 
+
+def filter_string(s):
+   # return isinstance( s, basestring )
+    return type(s) is str
 
 # funcion para eliminar el inicio de un string recursivamente, por ejemplo si comienza por com.com.com.google.es, nos quedamos con google.es
 def delete_ini(text, subString):

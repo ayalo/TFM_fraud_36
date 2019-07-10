@@ -15,8 +15,11 @@ from src.main.python.DomainCleaner import domain_cleaner
 from src.main.python.IpCleaner import ip_cleaner
 
 from pyspark.sql.functions import udf
+from pyspark.sql.functions import col
+
 from pyspark.sql import functions as F
 from pyspark.sql.types import *
+
 
 
 def get_vertices(df):
@@ -34,13 +37,14 @@ def get_vertices(df):
     :return: df_vertices
 
     """
-    df_dom = df.select( "referrer_domain" )
-    df_ip = df.select( "user_ip" )
+    df_dom = df.select( col( "domain_cleaned" ).alias( "id" ) )
+    df_dom.count()
+    df_ip = df.select( col( "ip_cleaned" ).alias( "id" ) )
     df_vertices = df_dom.union( df_ip )
     #print (" Pintamos Dataframe vertices :")
     #df_vertices.show()
     # renombramos columna 'referrer_domain' para que graphframes encuentre columna 'id' y pueda crear el grafo.
-    df_vertices=df_vertices.toDF("id")
+    #df_vertices=df_vertices.toDF("id")
     #df_vertices = (df_vertices
     #            .withColumnRenamed( "referrer_domain", "id" ))
     #print( "- df_vertices.explain()" )
@@ -55,19 +59,19 @@ def get_edges(df):
     :param df: dataframe from our data. Idem format like in get_vertices function.
     :return: df_edges
     """
-    df_count_domain_ips = df.select("referrer_domain","user_ip").groupBy("referrer_domain").agg(F.collect_list(F.col("user_ip")).alias("IP_list"))
+    ###df_count_domain_ips = df.select("referrer_domain","user_ip").groupBy("referrer_domain").agg(F.collect_list(F.col("user_ip")).alias("IP_list"))
     #print( " Pintamos DF df_count_domain_ips.show :" )
     #df_count_domain_ips.show()
-    rdd_count_domain_ips = df_count_domain_ips.rdd.map(lambda x:(x.referrer_domain,x.IP_list,len(x.IP_list)))
-    df_count_domain_ips=rdd_count_domain_ips.toDF(["referrer_domain", "IP_list", "total_links"]) #--> Tabla domain-ip-total_visitas
+    ###rdd_count_domain_ips = df_count_domain_ips.rdd.map(lambda x:(x.referrer_domain,x.IP_list,len(x.IP_list)))
+    ###df_count_domain_ips=rdd_count_domain_ips.toDF(["referrer_domain", "IP_list", "total_links"]) #--> Tabla domain-ip-total_visitas
 
     #print( " Pintamos DF df_count_domain_ips.show :" )
     #df_count_domain_ips.show(5,False)
-    df_edges=df.groupBy("referrer_domain","user_ip").count()
+    ###df_edges=df.groupBy("referrer_domain","user_ip").count()
     #print( " Pintamos DF df_edges.show :" )
     #df_edges.show()
 
-    df_edges=df_edges.toDF("src","dst","edge_weight")
+    ###df_edges=df_edges.toDF("src","dst","edge_weight")
     #df_edges= (df_edges
     #        .withColumnRenamed("referrer_domain","src")
     #        .withColumnRenamed("user_ip","dst"))
@@ -76,6 +80,10 @@ def get_edges(df):
 
     #print( " Pintamos DF edges.show :" )
     #df_edges.show()
+
+    df_edges = df.groupBy( "domain_cleaned", "ip_cleaned" ).count().select(
+        col( "domain_cleaned" ).alias( "src" ), col( "ip_cleaned" ).alias( "dst" ),
+        col( "count" ).alias( "edge_weight" ) )  # .persist()
 
     return df_edges
 
@@ -90,15 +98,20 @@ def get_graph_DI(df):
     """
 
     df_vertices=get_vertices(df)
-    df_edges=get_edges(df)
+    df_edges=get_edges(df).persist()
 
-    print("MAIN -- df_vertices: --")
+    df_filtrado=filter(df_edges)
+    print("get_graph_DI -- df_filtrado: --")
+    df_filtrado.show()
+
+
+    print("get_graph_DI -- df_vertices: --")
     df_vertices.show()
-    print("MAIN -- df_edges: --")
+    print("get_graph_DI -- df_edges: --")
     df_edges.show()
 
     ## Generar funcion Crea GraphFrame
-    print("Creamos GraphFrame -- ")
+    print("get_graph_DI -- Creamos GraphFrame -- ")
     ##g = GraphFrame(df_vertices_index, df_edges) # de cuando añadiamos columna 'id'  y no renombrabamos 'domain'
     gf = GraphFrame(df_vertices, df_edges)
 
@@ -112,6 +125,7 @@ def draw_igraph(g):
     :return:
     """
     ig = Graph.TupleList( g.edges.collect(), directed=True )
+    print("draw_igraph-- despues ---")
     plot( ig )
 
 
@@ -125,17 +139,17 @@ def draw_nx (df_edges):
     df = df_edges.toPandas()  ##GUARRADA
 
     B = nx.Graph()
-    print ( "draw -- despues nx.Graph()")
+    print ( "draw_nx -- despues nx.Graph()")
 
     B.add_nodes_from(df['src'], bipartite=1)
-    print ( "draw -- despues add_nodes_from src")
+    print ( "draw_nx -- despues add_nodes_from src")
 
     B.add_nodes_from(df['dst'], bipartite=0)
-    print ( "draw -- despues add_nodes_from dst")
+    print ( "draw_nx -- despues add_nodes_from dst")
     B.add_weighted_edges_from(
         [(row['src'], row['dst'], 1) for idx, row in df.iterrows()],
         weight='weight')
-    print ( "draw -- Nodes added to B")
+    print ( "draw_nx -- Nodes added to B")
 
     print(B.edges(data=True))
     # [('test1', 'example.org', {'weight': 1}), ('test3', 'example.org', {'weight': 1}), ('test2', 'example.org', {'weight': 1}),
@@ -150,32 +164,50 @@ def draw_nx (df_edges):
 
     plt.show()
 
+
+def filter_string(s):
+   # return isinstance( s, basestring )
+    return type(s) is str
+
+
 def clean(df):
-    df_dropna = df.dropna( subset=('user_ip', 'referrer_domain') )
-    #df_dropna.head()
+
+    udf_filter_string = udf( filter_string, BooleanType() )
+
+    df = df.filter(
+        (udf_filter_string( F.col( "referrer_domain" ) )) & (udf_filter_string( F.col( "user_ip" ) )) )
 
     # Añado una columna mas al df_current con el user_ip normalizado : ip_cleaned
     # Añado una columna mas al df_current con el referrer_domain normalizado : domain_cleaned
 
     udf_ipcleaner = udf( ip_cleaner, StringType() )
-    udf_domaincleaner = udf( domain_cleaner, StringType() )
+    print( "clean-- Calculando df_cleaned_ip" )
+    df_cleaned_ip = df.withColumn( 'ip_cleaned', udf_ipcleaner( df.user_ip ) )
 
-    print( "Calculando df_cleaned_ip" )
-    df_cleaned_ip = df_dropna.withColumn( 'ip_cleaned', udf_ipcleaner( df.user_ip ) )
-    df_cleaned_ip.select( "referrer_domain" ).count()
-    #df_cleaned_ip.head()
-
-    df_cleaned = df_cleaned_ip.withColumn( 'domain_cleaned', udf_domaincleaner( df_cleaned_ip.referrer_domain ) )
-    df_cleaned.select( "referrer_domain" ).count()
-    #df_cleaned.head()
-
-    df_cleaned_dropna = df_cleaned.dropna( subset=('user_ip', 'referrer_domain', 'ip_cleaned', 'domain_cleaned') )
+    udf_domaincleaner = udf(domain_cleaner, StringType())
+    df_cleaned= df_cleaned_ip.withColumn('domain_cleaned',udf_domaincleaner(df_cleaned_ip.referrer_domain))
 
     ## DROP/Filter Format not valid in ip_cleaned
-    df_cleaned_format = df_cleaned_dropna.filter( (df.ip_cleaned != 'Format not valid') )
-
+    df_cleaned_format = df_cleaned.filter( (df_cleaned.ip_cleaned != 'Format not valid') )
 
     return df_cleaned_format
+
+def filter (df): ## con  df_edges
+    print ("filter -- estoy en filter")
+    df_domain_filter = df.groupBy( "src" ).count().select( col( "src" ).alias( "src_filter" ),
+                                                                 col( "count" ).alias( "count_filter" ) )
+    print ("filter --  calulado df_domain_filter ")
+    df_ip_domain_filter=  df.groupBy("dst").count().select(col("dst").alias("src_filter"),col("count").alias("count_filter"))
+    print ("filter --  calulado df_ip_domain_filter ")
+
+    df_filter = df_domain_filter.union( df_ip_domain_filter )
+    print ("filter --  hecha union ")
+
+    df_filter.filter("count_filter = 1").count()
+    print ("filter -- despues de count ")
+    print( "df_filter count_filter = 1{} ".format( df_filter.select( "count_filter = 1" ).count() ) )
+
+    return df_filter
 
 def main():
     '''Program entry point
@@ -214,28 +246,27 @@ def main():
                     '30.50.70.90']})
              #'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
     spark = SparkSession.builder.getOrCreate()
-    ####df = spark.createDataFrame( data )
+    ##df = spark.createDataFrame( data )
     df = spark.read.format("csv").option("header", 'true').option("delimiter", ',').load("/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz")
 
 
-    print (" Pintamos Dataframe completo :")
+    print ("MAIN -- Pintamos Dataframe completo :")
     df.show()
 
     df=clean(df)
 
-    print("cleaned df :")
+    print("MAIN --cleaned df :")
     df.show()
-
-    print ("get graph DI : ")
-    gf=get_graph_DI( df )G
+    print ("MAIN --get graph DI : ")
+    gf=get_graph_DI( df )
     print( "MAIN -- gf -- Check the number of edges of each vertex" )
     gf.degrees.show()
 
 
     print( "main -- Draw using igraph :")
     draw_igraph(gf)
-    print( "main -- Draw using nx.Graph :")
-    draw_nx(get_edges(df))
+    #print( "main -- Draw using nx.Graph :")
+    #draw_nx(get_edges(df))
 
     return gf
 
