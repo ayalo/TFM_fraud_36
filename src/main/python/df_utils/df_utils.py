@@ -18,17 +18,17 @@ from pyspark.sql.types import *
 from src.main.python.gf_utils.gf_utils import *
 
 
-def print_show(df):
+def print_show(df): ##quitar
     print( "df_utils print_show --" )
     df.show()
 
 
-def filter_string(s):
+def filter_string(s): # usada en DI y DD
     # return isinstance( s, basestring )
     return type( s ) is str
 
 
-def clean(df):
+def clean(df): # usada en DI y DD
     print( "df_utils clean --" )
 
     udf_filter_string = udf( filter_string, BooleanType() )
@@ -51,7 +51,7 @@ def clean(df):
 
     return df_cleaned_format
 
-def format_vertices(df, a):
+def format_vertices(df, a): ## no funciona con DomainIp, no se usa en DomainDomain
     """
     Rename columns of  df_vertices to use GrapFrames [id]
     :param df: df_vertices
@@ -60,12 +60,12 @@ def format_vertices(df, a):
 
     """
     print( "df_utils format_vertices --" )
-    df_vertices = df.select( col( "a" ).alias( "id" ) )
+    df_vertices = df.select( col(f"{a}" ).alias( "id" ) )
 
     return df_vertices
 
 
-def format_edges(df, a, b, c): ##no funciona para DomainIp
+def format_edges(df, a, b, c): ##no funciona para DomainIp , no se usa en DomainDomain
     '''
      To rename the columns of df_edges in the correct format to GraphFrames [src, dst, edge_weight]
     :param df: df_edges with the incorrect name columns
@@ -76,13 +76,13 @@ def format_edges(df, a, b, c): ##no funciona para DomainIp
     '''
     print ("df_utils format_edges --")
     df_edges = df.select(
-        col( "a" ).alias( "src" ), col( "b" ).alias( "dst" ),
-        col( "c" ).alias( "edge_weight" ) )
+        col( f"{a}" ).alias( "src" ), col( f"{b}" ).alias( "dst" ),
+        col( f"{c}" ).alias( "edge_weight" ) )
 
     return df_edges
 
 
-def draw_nx (df_edges):
+def draw_nx (df_edges):# usada en DI y DD, no funciona con muchos nodos
     """
 
     :param df_edges: df_edges from a GraphFrame

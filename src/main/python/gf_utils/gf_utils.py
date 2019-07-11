@@ -18,7 +18,7 @@ from pyspark.sql.types import *
 from src.main.python.df_utils.df_utils import *
 
 
-def get_graph(df_v, df_e):  ## no funciona con DomainIp
+def get_graph(df_v, df_e):  ## no funciona con DomainIp, no se usa en DomainDomain
     """
     Get GraphFrame to draw a bipartite graph
     :param df_v : dataframe of vertices
@@ -33,18 +33,21 @@ def get_graph(df_v, df_e):  ## no funciona con DomainIp
     return gf
 
 
-def filter_gf(g):  # filtar count=1 en el grafo. Devuelve un grafo
+def filter_gf(g):  # filtar count=1 en el grafo. Devuelve un grafo # Usada en DI y DD
     print( "gf_utils filter_gf --" )
+    g.edges.show()
+    num_counter = g.edges.filter( "edge_weight > '10'" ).count()
+    print( "The number of follow edges edge_weight > 10  is", num_counter )
 
-    num_counter = g.edges.filter( "edge_weight > '15'" ).count()
-    print( "The number of follow edges edge_weight > 15  is", num_counter )
+    df_edges_filtered = g.edges.filter( "edge_weight > '10' " )
 
-    df_edges_filtered = g.edges.filter( "edge_weight > '15'" )
+
+
 
     return df_edges_filtered
 
 
-def draw_igraph(g):
+def draw_igraph(g):  ##usada en DI y DD
     """
     :param g:
     :return:

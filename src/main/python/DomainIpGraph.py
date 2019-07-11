@@ -35,7 +35,7 @@ def get_edges(df):
     :return: df_edges
     """
     print( "DomainIpGraph get_edges-- :" )
-    df_edges = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
+    #df_edges = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
     ###... no funciona ...### df_edges = format_edges(df_edges,"domain_cleaned","ip_cleaned","count")
     df_edges = df.groupBy( "domain_cleaned", "ip_cleaned" ).count().select(
         col( "domain_cleaned" ).alias( "src" ), col( "ip_cleaned" ).alias( "dst" ),
@@ -61,6 +61,15 @@ def get_graph_DI(df):
     gf = GraphFrame( df_vertices, df_edges )  # get_graph(df_vertices,df_edges)
 
     df_edges_filtered = filter_gf( gf )
+
+    print( "DomainIpGraph get_graph_DI-- df_edges_src count : {} ".format( df_edges_filtered.select( "src" ).count() ) )
+
+    print( "DomainIpGraph get_graph_DI-- df_edges_dst count : {} ".format( df_edges_filtered.select( "dst" ).count() ) )
+    df_dom = df_edges_filtered.select( col( "src" ).alias( "id" ) )
+    df_ip = df_edges_filtered.select( col( "dst" ).alias( "id" ) )
+    df_vertices = df_dom.union( df_ip )
+
+    print( "DomainIpGraph get_graph_DI-- df_vertices count : {} ".format( df_vertices.select( "id" ).count() ) )
 
     gf_filtered = GraphFrame( df_vertices, df_edges_filtered )  # get_graph(df_vertices,df_edges_filtered)
 
