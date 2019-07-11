@@ -6,7 +6,7 @@ from graphframes.examples import Graphs
 from igraph import *
 from matplotlib import pyplot as plt
 from matplotlib import *
-from src.main.python.bipartite_graph import *
+from src.main.python._bipartite_graph import *
 
 
 
