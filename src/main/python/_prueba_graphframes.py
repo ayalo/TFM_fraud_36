@@ -121,7 +121,7 @@ def main():
 
     #print ("Show only connected components")
     #spark.sparkContext.setCheckpointDir( 'prueba_graphframes_cps' )
-    #g.connectedComponents().show()
+    #g.connectedComponents().show() ## necesita una carpeta para cps
 
     # Query Graph para obtener interseccion de IPs visitadas por 2 dominios distintos
     df_motifs=g.find( "(a)-[e]->(b); (c)-[e2]->(b)" ).filter("a != c").dropDuplicates(['e','e2'])

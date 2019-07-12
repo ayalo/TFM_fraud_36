@@ -1,13 +1,12 @@
-from pyspark.sql.functions import col
+from gf_utils.gf_utils import *
+from df_utils.df_utils import *
+from draw_utils.draw_utils import *
 
-from src.main.python.gf_utils.gf_utils import *
-from src.main.python.df_utils.df_utils import *
 
-
-def get_vertices(df):
+def get_edges_domip(df):
     """
-    Creating a df_vertices to use GrapFrames
-    :param df:  dataframe from our data.
+    Creating a df_edges to use GraphFrames
+    :param df: dataframe from our data. Idem format like in get_vertices function.
                 format:
                     root
                         |-- user_ip: string (nullable = true)
@@ -16,53 +15,37 @@ def get_vertices(df):
                         |-- referrer_domain: string (nullable = true)
                         |-- ssp_domain: string (nullable = true)
                         |-- date_time: string (nullable = true)
-    :return: df_vertices
-
-    """
-    print( "DomainIpGraph get_vertices-- :" )
-
-    df_dom = df.select( col( "domain_cleaned" ).alias( "id" ) )
-    df_ip = df.select( col( "ip_cleaned" ).alias( "id" ) )
-    df_vertices = df_dom.union( df_ip )
-
-    return df_vertices
-
-
-def get_edges(df):
-    """
-    Creating a df_edges to use GraphFrames
-    :param df: dataframe from our data. Idem format like in get_vertices function.
     :return: df_edges
     """
     print( "DomainIpGraph get_edges-- :" )
-    #df_edges = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
-    ###... no funciona ...### df_edges = format_edges(df_edges,"domain_cleaned","ip_cleaned","count")
-    df_edges = df.groupBy( "domain_cleaned", "ip_cleaned" ).count().select(
-        col( "domain_cleaned" ).alias( "src" ), col( "ip_cleaned" ).alias( "dst" ),
-        col( "count" ).alias( "edge_weight" ) )  # .persist()
+    df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
+    df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
 
     return df_edges
 
 
-def get_graph_DI(df,min_edges):
+def get_graph_domip(df, min_edge):
     """
     Get GraphFrame to draw a bipartite graph
     :param df dataframe from our data. Idem format like in get_vertices function.
-    :return: gf (GraphFrame graph)
+    :param min_edge: value to dismiss all the nodes on g below the limit_edge value
+                        (if for a src - dst tuple : edge_weight <  limit_edge this row is discarded)
+    :return: gf_filtered (GraphFrame graph) filtered by min_edge
 
     :definition df_vertices: vertices for the graphframe : domains and ips
     :definition df_edges: links between them
     """
     print( "DomainIpGraph get_graph_DI-- :" )
 
-    df_vertices = get_vertices( df ).persist()
-    df_edges = get_edges( df ).persist()
+    df_edges = get_edges_domip( df ).persist()
+    df_vertices = get_vertices( df, "domain_cleaned", "ip_cleaned" ).persist()
 
     gf = GraphFrame( df_vertices, df_edges )  # get_graph(df_vertices,df_edges)
 
-    gf_filtered= filter_gf( gf,min_edges)
+    gf_filtered = filter_gf( gf, min_edge )
 
     return gf_filtered
+
 
 def main():
     '''Program entry point
@@ -101,7 +84,7 @@ def main():
                      '30.50.70.90']} )
     # 'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
     spark = SparkSession.builder.getOrCreate()
-    #df = spark.createDataFrame( data )
+    # df = spark.createDataFrame( data )
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
         "/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz" )
 
@@ -113,12 +96,12 @@ def main():
     print( "DomainIpGraph MAIN--cleaned df ..." )
     # df.show()
     print( "DomainIpGraph MAIN--get graph DI ... " )
-    gf = get_graph_DI( df ,10)
+    gf = get_graph_domip( df, 10 )
 
     print( "DomainIpGraph MAIN-- Draw using igraph ..." )
     draw_igraph( gf )
-    print( "main -- Draw using nx.Graph :")
-    draw_nx(gf.edges)
+    print( "main -- Draw using nx.Graph :" )
+    draw_nx( gf.edges )
 
     return gf
 

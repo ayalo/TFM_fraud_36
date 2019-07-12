@@ -56,7 +56,7 @@ def clean(df):  # usada en DI (con el df original) y DD (con el df original)
     return df_cleaned_format
 
 
-def format_vertices(df,a):  ## no funciona con DomainIp, no se usa en DomainDomain
+def format_vertices(df,a):  ## creo que no se usa
     """
     Function to Rename columns of  df_vertices to use GrapFrames [id]
     :param df: df_vertices
@@ -69,8 +69,25 @@ def format_vertices(df,a):  ## no funciona con DomainIp, no se usa en DomainDoma
 
     return df_vertices
 
+def get_vertices(df_edges,a,b):
+    print( "df_utils get_vertices-- :" )
 
-def format_edges(df, a, b, c):  ##no funciona para DomainIp , no se usa en DomainDomain
+
+    df_dom = df_edges.select( col( f"{a}" ).alias( "id" ) )
+    df_ip = df_edges.select( col( f"{b}" ).alias( "id" ) )
+
+    print( "df_utils get_vertices-- df_vertices_withduplicates :" )
+    df_vertices_withduplicates=df_dom.union( df_ip )
+    df_vertices_withduplicates.show()
+    print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
+
+    df_vertices = df_dom.union( df_ip ).dropDuplicates()
+    df_vertices.show()
+
+
+    return df_vertices
+
+def get_edges(df, a, b, c):
     '''
     Function to Rename the columns of df_edges in the correct format to GraphFrames [src, dst, edge_weight]
     :param df: df_edges with the incorrect name columns
@@ -79,7 +96,7 @@ def format_edges(df, a, b, c):  ##no funciona para DomainIp , no se usa en Domai
     :param c: old name for column edge_weight
     :return: df_edges
     '''
-    print( "df_utils format_edges --" )
+    print( "df_utils get_edges --" )
     df_edges = df.select(
         col( f"{a}" ).alias( "src" ), col( f"{b}" ).alias( "dst" ),
         col( f"{c}" ).alias( "edge_weight" ) )

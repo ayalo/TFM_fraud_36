@@ -28,7 +28,7 @@ def get_graph(df_v, df_e):  ## no funciona con DomainIp, no se usa en DomainDoma
     print( "gf_utils get_graph --" )
 
     df_vertices = format_vertices( df_v )
-    df_edges = format_edges( df_e )
+    df_edges = get_edges( df_e )
     gf = GraphFrame( df_vertices, df_edges )
     return gf
 
@@ -43,31 +43,32 @@ def filter_gf(g, min_edge):  # filtar count=1 en el grafo. Devuelve un grafo # U
     :return gf_filtered: GraphFrame generated with
     """
 
-    print(f"gf_utils prueba filterEdges : {min_edge}") ## hace lo mismo que g.edges.filter( "edge_weight > '10' " )
-    g2=g.filterEdges(f"edge_weight > {min_edge}")
-    g2.edges.show()
+    print(f"gf_utils filter_gf filterEdges : {min_edge}") ## hace lo mismo que g.edges.filter( "edge_weight > '10' " )
+    g_edges_filtered =g.filterEdges(f"edge_weight >= {min_edge}")
+    g_edges_filtered.edges.show()
 
-    num_counter = g.edges.filter( f"edge_weight > {min_edge}" ).count()
-    print( f"The number of follow edges edge_weight > {min_edge}  is  {num_counter} " )
+    #num_counter = g.edges.filter( f"edge_weight > {min_edge}" ).count()
+    #print( f"The number of follow edges edge_weight > {min_edge}  is  {num_counter} " )
 
-    df_edges_filtered = g.edges.filter( f"edge_weight > {min_edge}  " )
-    print( "gf_utils filter_gf --" )
-    df_edges_filtered.show()
-    print( "DomainIpGraph get_graph_DI-- df_edges_src count : {} ".format( df_edges_filtered.select( "src" ).count() ) )
+    #df_edges_filtered = g.edges.filter( f"edge_weight > {min_edge}  " )
+    #print( "gf_utils filter_gf --" )
+    #df_edges_filtered.show()
+    #print( "DomainIpGraph get_graph_DI-- df_edges_src count : {} ".format( df_edges_filtered.count() ) )
 
-    print( "DomainIpGraph get_graph_DI-- df_edges_dst count : {} ".format( df_edges_filtered.select( "dst" ).count() ) )
 
 ## GUARRADA ··
-    df_dom = df_edges_filtered.select( col( "src" ).alias( "id" ) )
-    df_ip = df_edges_filtered.select( col( "dst" ).alias( "id" ) )
-    df_vertices_filtered = df_dom.union( df_ip )
+    #df_dom = df_edges_filtered.edges.select( col( "src" ).alias( "id" ) )
+    #df_ip = df_edges_filtered.edges.select( col( "dst" ).alias( "id" ) )
+    #df_vertices_filtered = df_dom.union( df_ip )
+    #print( "DomainIpGraph get_graph_DI-- df_vertices")
+    #df_vertices_filtered.show()
 
-    print( "DomainIpGraph get_graph_DI-- df_vertices count : {} ".format( df_vertices_filtered.select( "id" ).count() ) )
+    #print( "DomainIpGraph get_graph_DI-- df_vertices count : {} ".format( df_vertices_filtered.select( "id" ).count() ) )
 
-    gf_filtered = GraphFrame( df_vertices_filtered, df_edges_filtered )#get_graph(df_vertices,df_edges_filtered)
+    #gf_filtered = GraphFrame( df_vertices_filtered, df_edges_filtered )#get_graph(df_vertices,df_edges_filtered)
 
-    return gf_filtered
-
+    #return gf_filtered
+    return g_edges_filtered
 
 def draw_igraph(g):  ##usada en DI y DD
     """
