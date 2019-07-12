@@ -44,7 +44,7 @@ def get_edges(df):
     return df_edges
 
 
-def get_graph_DI(df):
+def get_graph_DI(df,min_edges):
     """
     Get GraphFrame to draw a bipartite graph
     :param df dataframe from our data. Idem format like in get_vertices function.
@@ -60,21 +60,9 @@ def get_graph_DI(df):
 
     gf = GraphFrame( df_vertices, df_edges )  # get_graph(df_vertices,df_edges)
 
-    df_edges_filtered = filter_gf( gf )
-
-    print( "DomainIpGraph get_graph_DI-- df_edges_src count : {} ".format( df_edges_filtered.select( "src" ).count() ) )
-
-    print( "DomainIpGraph get_graph_DI-- df_edges_dst count : {} ".format( df_edges_filtered.select( "dst" ).count() ) )
-    df_dom = df_edges_filtered.select( col( "src" ).alias( "id" ) )
-    df_ip = df_edges_filtered.select( col( "dst" ).alias( "id" ) )
-    df_vertices = df_dom.union( df_ip )
-
-    print( "DomainIpGraph get_graph_DI-- df_vertices count : {} ".format( df_vertices.select( "id" ).count() ) )
-
-    gf_filtered = GraphFrame( df_vertices, df_edges_filtered )  # get_graph(df_vertices,df_edges_filtered)
+    gf_filtered= filter_gf( gf,min_edges)
 
     return gf_filtered
-
 
 def main():
     '''Program entry point
@@ -113,26 +101,24 @@ def main():
                      '30.50.70.90']} )
     # 'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
     spark = SparkSession.builder.getOrCreate()
-    ##df = spark.createDataFrame( data )
+    #df = spark.createDataFrame( data )
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
         "/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz" )
 
-    print( "DomainIpGraph MAIN-- Pintamos Dataframe completo :" )
+    print( "DomainIpGraph MAIN-- Pintamos Dataframe completo ..." )
     # df.show()
 
+    print( "DomainIpGraph MAIN-- clean ..." )
     df = clean( df )
-
-    print( "DomainIpGraph MAIN--cleaned df :" )
+    print( "DomainIpGraph MAIN--cleaned df ..." )
     # df.show()
-    print( "DomainIpGraph MAIN--get graph DI : " )
-    gf = get_graph_DI( df )
+    print( "DomainIpGraph MAIN--get graph DI ... " )
+    gf = get_graph_DI( df ,10)
 
-    print( "DomainIpGraph MAIN-- gf -- Check the number of edges of each vertex" )
-
-    print( "DomainIpGraph MAIN-- Draw using igraph :" )
+    print( "DomainIpGraph MAIN-- Draw using igraph ..." )
     draw_igraph( gf )
-    # print( "main -- Draw using nx.Graph :")
-    # draw_nx(get_edges(df))
+    print( "main -- Draw using nx.Graph :")
+    draw_nx(gf.edges)
 
     return gf
 

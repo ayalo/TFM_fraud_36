@@ -17,8 +17,8 @@ from pyspark.sql.types import *
 
 from src.main.python.DomainIpGraph import get_graph_DI
 
-from src.main.python.gf_utils.gf_utils import *
-from src.main.python.df_utils.df_utils import *
+from gf_utils.gf_utils import *
+from df_utils.df_utils import *
 
 
 def get_graph(df):
@@ -115,7 +115,7 @@ def main():
 
     df = clean( df )
     # g= src.main.python.DomainIpGraph.get_graph(df)
-    g = get_graph_DI( df ).persist()
+    g = get_graph_DI( df,10 ).persist()
     #print ("DomainDomainGraph MAIN -- triplets ")
     #g.triplets.show(100,False)
 
@@ -144,7 +144,7 @@ def main():
 
     gf = get_graph( df_degree_ratio )
     draw_igraph( gf )
-    #draw_nx(get_edges(df_degree_ratio))
+    draw_nx(gf.edges)
 
 
 if __name__ == "__main__":
