@@ -1,4 +1,4 @@
-from src.main.python.DomainCleaner import domain_cleaner
+from src.main.python.row_cleaners_utils.row_cleaners_utils import domain_cleaner
 import unittest
 
 class TestDomainCleaner(unittest.TestCase):

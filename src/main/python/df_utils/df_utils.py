@@ -1,18 +1,12 @@
-from pyspark.sql import SparkSession
-import pandas as pd
-from graphframes import *
-
-from igraph import *
-import networkx as nx
-import matplotlib.pyplot as plt
-
 from pyspark.sql.functions import udf
 from pyspark.sql.functions import col
-
 from pyspark.sql import functions as F
 from pyspark.sql.types import *
 
-from src.main.python.gf_utils.gf_utils import *
+from gf_utils.gf_utils import *
+
+from domain_cleaner import domain_cleaner
+from ip_cleaner import ip_cleaner
 
 
 def is_string(s):  # usada en DI y DD
@@ -27,19 +21,22 @@ def is_string(s):  # usada en DI y DD
     return type( s ) is str
 
 
-def clean(df):  # usada en DI (con el df original) y DD (con el df original)
+def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y DD (con el df original)
     """
     Function to clean the original data from df, eliminate or filter null, none, and other types that are not string in
     'referrer_domain' or 'user_ip' columns, in order to clean the original data.
     :param df:
-    :return:
+    :param referrer_domain: first column to clean
+    :param user_ip: second column to clean
+    :return: df_cleaned_format
     """
+
     print( "df_utils clean --" )
 
     udf_filter_string = udf( is_string, BooleanType() )
 
     df = df.filter(
-        (udf_filter_string( F.col( "referrer_domain" ) )) & (udf_filter_string( F.col( "user_ip" ) )) )
+        (udf_filter_string( F.col( f"{referrer_domain}" ) )) & (udf_filter_string( F.col( f"{user_ip}" ) )) )
 
     # Adding new column to df with the normalized/filtered/cleaned user_ip : ip_cleaned
     udf_ipcleaner = udf( ip_cleaner, StringType() )
@@ -56,36 +53,22 @@ def clean(df):  # usada en DI (con el df original) y DD (con el df original)
     return df_cleaned_format
 
 
-def format_vertices(df,a):  ## creo que no se usa
-    """
-    Function to Rename columns of  df_vertices to use GrapFrames [id]
-    :param df: df_vertices
-    :param a: old name for column id
-    :return: df_vertices
-
-    """
-    print( "df_utils format_vertices --" )
-    df_vertices = df.select( col( f"{a}" ).alias( "id" ) )
-
-    return df_vertices
-
-def get_vertices(df_edges,a,b):
+def get_vertices(df_edges, a, b):
     print( "df_utils get_vertices-- :" )
-
 
     df_dom = df_edges.select( col( f"{a}" ).alias( "id" ) )
     df_ip = df_edges.select( col( f"{b}" ).alias( "id" ) )
 
     print( "df_utils get_vertices-- df_vertices_withduplicates :" )
-    df_vertices_withduplicates=df_dom.union( df_ip )
+    df_vertices_withduplicates = df_dom.union( df_ip )
     df_vertices_withduplicates.show()
-    print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
 
+    print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
     df_vertices = df_dom.union( df_ip ).dropDuplicates()
     df_vertices.show()
 
-
     return df_vertices
+
 
 def get_edges(df, a, b, c):
     '''
@@ -104,43 +87,47 @@ def get_edges(df, a, b, c):
     return df_edges
 
 
-def draw_nx(df_edges):  # usada en DI y DD, no funciona con muchos datos
+def get_edges_domip(df):
     """
-    Function to plot a bipartite graph with networkx
-    :param df_edges: df_edges from a GraphFrame
-    :return: ploted graph
+    Creating a df_edges to use GraphFrames
+    :param df: dataframe from our data. Idem format like in get_vertices function.
+                format:
+                    root
+                        |-- user_ip: string (nullable = true)
+                        |-- uuid_hashed: string (nullable = true)
+                        |-- useragent: string (nullable = true)
+                        |-- referrer_domain: string (nullable = true)
+                        |-- ssp_domain: string (nullable = true)
+                        |-- date_time: string (nullable = true)
+    :return: df_edges
     """
-    print( "df_utils draw_nx --" )
+    print( "DomainIpGraph get_edges-- :" )
+    df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
+    df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
 
-    df = df_edges.toPandas()  ##GUARRADA
+    return df_edges
 
-    B = nx.Graph()
-    print( "draw -- despues nx.Graph()" )
 
-    B.add_nodes_from( df['src'], bipartite=1 )
-    print( "draw -- despues add_nodes_from src" )
+def get_edges_domdom(df):
+    """
+    Creating a df_edges to use GraphFrames
+    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :return: df_edges
+    """
+    print( "df_utils get_edges_domdom -- df que llega ..." )
+    df.show()
+    # df.printSchema()
 
-    B.add_nodes_from( df['dst'], bipartite=0 )
-    print( "draw -- despues add_nodes_from dst" )
-    #B.add_weighted_edges_from(
-    #    [(row['src'], row['dst'], 1) for idx, row in df.iterrows()],
-    #    weight='weight' )
+    df_edges_DD_exists = df.select( df.a, df.c,
+                                    F.when( df['edge_ratio'] > 0.5, 1 ).otherwise( 0 ).alias(
+                                        "edge_ratio" ) )  # .show()
 
-    B.add_edges_from(zip(df['src'],df['dst']),weight=1)
+    df_edges_DD_exists.printSchema()
 
-    print( "draw -- Nodes added to B" )
+    print( "df_utils get_edges_domdom -- antes get_edges ..." )
 
-    #print( B.edges( data=True ) )
-    # [('test1', 'example.org', {'weight': 1}), ('test3', 'example.org', {'weight': 1}), ('test2', 'example.org', {'weight': 1}),
-    # ('website.com', 'else', {'weight': 1}), ('site.com', 'something', {'weight': 1})]
+    df_edges = get_edges( df_edges_DD_exists, "a", "c", "edge_ratio" )
+    print( "df_utils get_edges_domdom -- df_edges calculado ..." )
+    df_edges.show()
 
-    pos = {node: [0, i] for i, node in enumerate( df['src'] )}
-    pos.update( {node: [1, i] for i, node in enumerate( df['dst'] )} )
-    print("draw -- despues de pos.update")
-    nx.draw( B, pos, with_labels=False )
-    for p in pos:  # raise text positions
-        pos[p][1] += 0.10
-    print("draw -- despues for ")
-    nx.draw_networkx_labels( B, pos )
-    print("draw -- ante de plot")
-    plt.show()
+    return df_edges

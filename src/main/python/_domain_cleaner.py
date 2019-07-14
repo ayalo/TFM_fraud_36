@@ -40,7 +40,7 @@ def domain_cleaner(domain):
 
 
 
-def filter_string(s):
+def filter_string(s): ##creo que no se usa, idem que is_string en df_utils
    # return isinstance( s, basestring )
     return type(s) is str
 
