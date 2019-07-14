@@ -1,4 +1,4 @@
-from src.main.python.row_cleaners_utils.row_cleaners_utils import ip_cleaner
+from src.main.python.utils.row_cleaners_utils import ip_cleaner
 import unittest
 
 class TestIpCleaner(unittest.TestCase):

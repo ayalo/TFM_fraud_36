@@ -3,10 +3,10 @@ from pyspark.sql.functions import col
 from pyspark.sql import functions as F
 from pyspark.sql.types import *
 
-from gf_utils.gf_utils import *
+from utils.gf_utils import *
 
-from domain_cleaner import domain_cleaner
-from ip_cleaner import ip_cleaner
+from utils.row_cleaners_utils import domain_cleaner
+from utils.row_cleaners_utils import ip_cleaner
 
 
 def is_string(s):  # usada en DI y DD

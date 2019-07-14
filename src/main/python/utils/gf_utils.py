@@ -1,6 +1,6 @@
 from graphframes import *
 
-from df_utils.df_utils import *
+from utils.df_utils import *
 
 
 def filter_gf(g, min_edge):  # filtar count=1 en el grafo. Devuelve un grafo # Usada en DI y DD

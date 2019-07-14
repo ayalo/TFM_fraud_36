@@ -1,10 +1,10 @@
-from pyspark.sql import SparkSession
+
 import pandas as pd
 
-from gf_utils.gf_utils import *
-from df_utils.df_utils import *
-from draw_utils.draw_utils import *
-
+from utils.gf_utils import *
+from utils.df_utils import *
+from utils.draw_utils import *
+from utils.spark_utils import *
 
 def main():
     '''Program entry point'''
@@ -40,7 +40,7 @@ def main():
                      '30.50.70.90',
                      '10.20.30.40']} )
     # 'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
-    spark = SparkSession.builder.getOrCreate()
+    spark = spark_session()
     # df = spark.createDataFrame( data )
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
         "/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz" )
