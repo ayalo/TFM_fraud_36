@@ -41,8 +41,8 @@ def get_graph_domip(df, min_edge):
     """
     Get GraphFrame to draw a bipartite graph
     :param df dataframe from our data. Idem format like in get_vertices function.
-    :param min_edge: value to dismiss all the nodes on g below the limit_edge value
-                        (if for a src - dst tuple : edge_weight <  limit_edge this row is discarded)
+    :param min_edge: value to dismiss all the nodes on g below the min_edge value
+                        (if for a src - dst tuple : edge_weight <  min_edge this row is discarded)
     :return: gf_filtered (GraphFrame graph) filtered by min_edge
 
     :definition df_vertices: vertices for the graphframe : domains and ips
