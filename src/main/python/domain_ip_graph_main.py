@@ -4,6 +4,8 @@ import pandas as pd
 from utils.gf_utils import *
 from utils.df_utils import *
 from utils.draw_utils import *
+from utils.spark_utils import *
+
 
 def main():
     '''Program entry point
@@ -41,8 +43,8 @@ def main():
                      '10.20.30.42',
                      '30.50.70.90']} )
     # 'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
-    spark = SparkSession.builder.getOrCreate()
-    # df = spark.createDataFrame( data )
+    spark = spark_session()
+    #df = spark.createDataFrame( data )
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
         "/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz" )
 
@@ -50,14 +52,15 @@ def main():
     # df.show()
 
     print( "DomainIpGraph MAIN-- clean ..." )
-    df = clean( df,"referrer_domain","user_ip" )
+    df_cleaned = clean( df,"referrer_domain","user_ip" )
     print( "DomainIpGraph MAIN--cleaned df ..." )
     # df.show()
     print( "DomainIpGraph MAIN--get graph DI ... " )
-    gf = get_graph_domip( df, 10 )
+    gf = get_graph_domip( df_cleaned, 10 )
 
     print( "DomainIpGraph MAIN-- Draw using igraph ..." )
     draw_igraph( gf )
+
     print( "main -- Draw using nx.Graph :" )
     draw_nx( gf.edges )
 

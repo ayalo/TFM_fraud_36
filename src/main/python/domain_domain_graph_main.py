@@ -64,17 +64,17 @@ def main():
 '''
     #TODO:: mover a un notebook
 
-    gf.edges.write.parquet("edges_prueba")
+    gf.edges.write.parquet("saved_graph/edges_prueba")
 
-    gf.vertices.write.parquet("vert_prueba")
+    gf.vertices.write.parquet("saved_graph/vert_prueba")
 
     draw_igraph( gf )
 
     # TODO:: mover a una clase solo
 
-    ed_2 = spark.read.parquet("edges_prueba")
+    ed_2 = spark.read.parquet("saved_graph/edges_prueba")
 
-    ver_2 = spark.read.parquet("vert_prueba")
+    ver_2 = spark.read.parquet("saved_graph/vert_prueba")
 
 
     gf_2 =  GraphFrame(ver_2,ed_2)

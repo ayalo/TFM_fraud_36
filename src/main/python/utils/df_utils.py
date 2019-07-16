@@ -53,19 +53,19 @@ def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y D
     return df_cleaned_format
 
 
-def get_vertices(df_edges, a, b):
+def get_vertices(df_edges, a, b): #cui
     print( "df_utils get_vertices-- :" )
 
     df_dom = df_edges.select( col( f"{a}" ).alias( "id" ) )
-    df_ip = df_edges.select( col( f"{b}" ).alias( "id" ) )
+    df_ip =  df_edges.select( col( f"{b}" ).alias( "id" ) )
 
     print( "df_utils get_vertices-- df_vertices_withduplicates :" )
     df_vertices_withduplicates = df_dom.union( df_ip )
-    df_vertices_withduplicates.show()
+    #df_vertices_withduplicates.show()
 
     print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
-    df_vertices = df_dom.union( df_ip ).dropDuplicates()
-    df_vertices.show()
+    df_vertices = df_vertices_withduplicates.dropDuplicates()
+    #df_vertices.show()
 
     return df_vertices
 
@@ -104,6 +104,7 @@ def get_edges_domip(df):
     print( "DomainIpGraph get_edges-- :" )
     df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
     df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
+    df_edges.show()
 
     return df_edges
 
