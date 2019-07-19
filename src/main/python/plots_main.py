@@ -1,4 +1,3 @@
-from pyspark.sql import SparkSession
 import pandas as pd
 
 from utils.gf_utils import *
@@ -48,23 +47,11 @@ def main():
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
         "/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz" )
 
-    print( "DomainIpGraph MAIN-- Pintamos Dataframe completo ..." )
-    # df.show()
+    print( "plots_main MAIN--  ..." )
 
-    print( "DomainIpGraph MAIN-- clean ..." )
-    df_cleaned = clean( df,"referrer_domain","user_ip" )
-    print( "DomainIpGraph MAIN--cleaned df ..." )
-    # df.show()
-    print( "DomainIpGraph MAIN--get graph DI ... " )
-    gf = get_graph_domip( df_cleaned, 10 )
+    print ("plots_main MAIN-- Get domain-ip graph ..")
+    g_domip = get_graph_domip( df, 15 ).persist()
 
-    print( "DomainIpGraph MAIN-- Draw using igraph ..." )
-    draw_igraph( gf )
-    ##draw_bp_igraph(gf) # FALTA POR HACER
-    print( "main -- Draw using nx.Graph :" )
-    draw_nx( gf.edges )
-
-    return gf
 
 
 if __name__ == "__main__":

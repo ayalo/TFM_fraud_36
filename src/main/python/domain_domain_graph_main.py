@@ -58,8 +58,11 @@ def main():
 
     gf = get_graph_domdom( g_domip ).persist()
 
-    draw_igraph( gf )
+    ##draw_igraph( gf )
 
+    ig, visual_style = draw_igraph( gf )
+
+    igraph_plot(ig,visual_style)
 
 '''
     #TODO:: mover a un notebook

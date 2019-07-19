@@ -40,7 +40,7 @@ def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y D
 
     # Adding new column to df with the normalized/filtered/cleaned user_ip : ip_cleaned
     udf_ipcleaner = udf( ip_cleaner, StringType() )
-    print( "clean-- Calculando df_cleaned_ip" )
+    print( "df-utils clean-- Calculando df_cleaned_ip" )
     df_cleaned_ip = df.withColumn( 'ip_cleaned', udf_ipcleaner( df.user_ip ) )
 
     # Adding new column to df with the normalized/filtered/cleaned referrer_domain : domain_cleaned
@@ -101,9 +101,13 @@ def get_edges_domip(df):
                         |-- date_time: string (nullable = true)
     :return: df_edges
     """
-    print( "DomainIpGraph get_edges-- :" )
+    print( "df_utils get_edges_domip-- : df" )
+    df.show()
     df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
+    print( "df_utils get_edges_domip-- :df_edges_count" )
+    df_edges_count.show()
     df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
+    print( "df_utils get_edges_domip-- :df_edges" )
     df_edges.show()
 
     return df_edges

@@ -62,7 +62,7 @@ def draw_igraph_origin(g):  ##usada en DI y DD
     ig = Graph.TupleList( g.edges.collect(), directed=True )
     print( "gf_utils draw_igraph ---- despues ig ---" )
     plot( ig )
-
+'''
 def draw_igraph(g):  ##usada en DI y DD
     """
     Function to plot a dispersion of nodes (TupleList) in a graph with igraph
@@ -72,6 +72,7 @@ def draw_igraph(g):  ##usada en DI y DD
 
     from igraph import Graph
     from igraph import plot
+
 
     print( "gf_utils draw_igraph --" )
 
@@ -102,19 +103,68 @@ def draw_igraph(g):  ##usada en DI y DD
     visual_style["main"] = "-- igraph plot :"
     plot( ig2, **visual_style )
 '''
-def draw_igraph_bipartite(g):  ##usada en DI y DD
+def draw_igraph(g):  ##usada en DI y DD
     """
     Function to plot a dispersion of nodes (TupleList) in a graph with igraph
     :param g: GraphFrame
     :return: ploted graph
     """
     from igraph import Graph
+
+    print( "gf_utils draw_igraph --" )
+
+    ig = Graph.TupleList( g.edges.collect(), directed=True )
+    visual_style = {}
+    N_vertices = ig.vcount()
+
+    layout = ig.layout( "kk" )
+    colors = ["lightgray", "cyan", "magenta", "yellow", "blue", "green", "red"]
+    for component in ig.components():
+        color = colors[min( 6, len( component ) - 1 )]
+        for vidx in component: ig.vs[vidx]["color"] = color
+
+    visual_style["vertex_size"] = 20
+    visual_style["vertex_label"] = ig.vs["name"]
+    visual_style["vertex_label_size"] = 14
+    visual_style["vertex_label_dist"] = 1
+    visual_style["vertex_label_angle"] = 1
+    visual_style["layout"] = layout
+    visual_style["bbox"] = (20 * N_vertices, 20 * N_vertices)  # (600,600)
+    visual_style["margin"] = 50
+    visual_style["main"] = "-- igraph plot :"
+
+    return ig, visual_style
+
+def igraph_plot (ig,visual_style):
+
     from igraph import plot
 
-    print( "gf_utils draw_igraph_bipartite --" )
-    igb = Graph.Bipartite( ,g.edges.collect(), directed=False )
-    igb.vs["type"]=0
-    igb.vs[n1:]["type"]=1
+    plot( ig, **visual_style )
 
-    plot( igb)
-'''
+
+def draw_bp_igraph(g):  ##
+    """
+    Function to plot a dispersion of nodes (Bipartite) in a graph with igraph
+    Bipartite graph
+    :param g: GraphFrame
+    :return: ploted graph
+    """
+    from igraph import Graph
+    from igraph import plot
+
+    print( "gf_utils draw_igraph_bipartite -- triplets.show" )
+
+    g.triplets.show()
+
+    df= g.triplets # format [src,edge,dst]
+
+    print( "gf_utils draw_igraph_bipartite -- rdd_bipartite_types.show" )
+    rdd_bipartite_types = df.rdd.map( lambda x: (x.src, x.dst,"1") )
+    df_types = rdd_bipartite_types.toDF()#"src","dst","edge","count")
+    df_types.show()
+
+    print( "gf_utils draw_igraph_bipartite --" )
+    igb = Graph.Bipartite(df_types.select("_3"),df_types.select("_1","_2"), directed=False )
+
+
+    plot( igb,layout=layout_as_bipartite)
