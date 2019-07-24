@@ -1,4 +1,8 @@
 import matplotlib.pyplot as plt
+from igraph import Graph
+from igraph import plot
+import networkx as nx
+import pandas as pd
 
 
 def draw_nx(df_edges):  # usada en DI y DD, no funciona con muchos datos
@@ -8,28 +12,28 @@ def draw_nx(df_edges):  # usada en DI y DD, no funciona con muchos datos
     :return: ploted graph
     """
 
-    import networkx as nx
-    import pandas as pd
+    #import networkx as nx
+    #import pandas as pd
 
-    print( "df_utils draw_nx --" )
+    print( "draw_utils draw_nx --" )
 
     df = df_edges.toPandas()  ##GUARRADA
 
     B = nx.Graph()
-    print( "df_utils draw_nx -- -- despues nx.Graph()" )
+    print( "draw_utils draw_nx -- -- despues nx.Graph()" )
 
     B.add_nodes_from( df['src'], bipartite=1 )
-    print( "df_utils draw_nx -- -- despues add_nodes_from src" )
+    print( "draw_utils draw_nx -- -- despues add_nodes_from src" )
 
     B.add_nodes_from( df['dst'], bipartite=0 )
-    print( "df_utils draw_nx -- -- despues add_nodes_from dst" )
-    # B.add_weighted_edges_from(
+    print( "draw_utils draw_nx -- -- despues add_nodes_from dst" )
+    #B.add_weighted_edges_from(
     #    [(row['src'], row['dst'], 1) for idx, row in df.iterrows()],
-    #    weight='weight' )
+    #    weight=row[] )
 
     B.add_edges_from( zip( df['src'], df['dst'] ), weight=1 )
 
-    print( "df_utils draw_nx -- -- Nodes added to B" )
+    print( "draw_utils draw_nx -- -- Nodes added to B" )
 
     # print( B.edges( data=True ) )
     # [('test1', 'example.org', {'weight': 1}), ('test3', 'example.org', {'weight': 1}), ('test2', 'example.org', {'weight': 1}),
@@ -37,13 +41,13 @@ def draw_nx(df_edges):  # usada en DI y DD, no funciona con muchos datos
 
     pos = {node: [0, i] for i, node in enumerate( df['src'] )}
     pos.update( {node: [1, i] for i, node in enumerate( df['dst'] )} )
-    print( "df_utils draw_nx -- -- despues de pos.update" )
+    print( "draw_utils draw_nx -- -- despues de pos.update" )
     nx.draw( B, pos, with_labels=False )
     for p in pos:  # raise text positions
         pos[p][1] += 0.10
-    print( "df_utils draw_nx -- -- despues for " )
+    print( "draw_utils draw_nx -- -- despues for " )
     nx.draw_networkx_labels( B, pos )
-    print( "df_utils draw_nx -- -- ante de plot" )
+    print( "draw_utils draw_nx -- -- ante de plot" )
     plt.show()
 
 
@@ -54,17 +58,18 @@ def draw_igraph_origin(g):  ##usada en DI y DD
     :return: ploted graph
     """
 
-    from igraph import Graph
-    from igraph import plot
+    #from igraph import Graph
+    #from igraph import plot
 
-    print( "gf_utils draw_igraph --" )
+    print( "draw_utils draw_igraph --" )
 
     ig = Graph.TupleList( g.edges.collect(), directed=True )
-    print( "gf_utils draw_igraph ---- despues ig ---" )
+    print( "draw_utils draw_igraph ---- despues ig ---" )
     plot( ig )
 '''
 def draw_igraph(g):  ##usada en DI y DD
     """
+    Version: 1.0
     Function to plot a dispersion of nodes (TupleList) in a graph with igraph
     :param g: GraphFrame
     :return: ploted graph
@@ -103,15 +108,49 @@ def draw_igraph(g):  ##usada en DI y DD
     visual_style["main"] = "-- igraph plot :"
     plot( ig2, **visual_style )
 '''
-def draw_igraph(g):  ##usada en DI y DD
+def draw_igraph_domain_domain(g):  ##usada en DI y DD
     """
+    Version: 1.0
     Function to plot a dispersion of nodes (TupleList) in a graph with igraph
     :param g: GraphFrame
     :return: ploted graph
     """
-    from igraph import Graph
+    #from igraph import Graph
 
-    print( "gf_utils draw_igraph --" )
+    print( "draw_utils draw_igraph --" )
+
+    ig = Graph.TupleList( g.edges.collect(), directed=True )
+    visual_style = {}
+    N_vertices = ig.vcount()
+
+    layout = ig.layout( "kk" )
+    colors = ["lightgray", "cyan", "magenta", "yellow", "blue", "green", "red"]
+    for component in ig.components():
+        color = colors[min( 6, len( component ) - 1 )]
+        for vidx in component: ig.vs[vidx]["color"] = color
+
+    visual_style["vertex_size"] = 20
+    visual_style["vertex_label"] = ig.vs["name"]
+    visual_style["vertex_label_size"] = 16
+    visual_style["vertex_label_dist"] = 1
+    visual_style["vertex_label_angle"] = -1
+    visual_style["layout"] = layout
+    visual_style["bbox"] = (25 * N_vertices, 25 * N_vertices)  # (600,600)
+    visual_style["margin"] = 50
+    visual_style["main"] = "-- igraph plot :"
+
+    return ig, visual_style
+
+def draw_igraph_domain_ip(g):
+    """
+       Version: 1.0
+       Function to plot a dispersion of nodes (TupleList) in a graph with igraph
+       :param g: GraphFrame
+       :return: ploted graph
+    """
+    # from igraph import Graph
+
+    print( "draw_utils draw_igraph --" )
 
     ig = Graph.TupleList( g.edges.collect(), directed=True )
     visual_style = {}
@@ -135,12 +174,13 @@ def draw_igraph(g):  ##usada en DI y DD
 
     return ig, visual_style
 
+'''
 def igraph_plot (ig,visual_style):
 
     from igraph import plot
 
     plot( ig, **visual_style )
-
+'''
 
 def draw_bp_igraph(g):  ##
     """
@@ -152,19 +192,19 @@ def draw_bp_igraph(g):  ##
     from igraph import Graph
     from igraph import plot
 
-    print( "gf_utils draw_igraph_bipartite -- triplets.show" )
+    #print( "gf_utils draw_igraph_bipartite -- triplets.show" )
 
-    g.triplets.show()
+    #g.triplets.show()
 
     df= g.triplets # format [src,edge,dst]
 
-    print( "gf_utils draw_igraph_bipartite -- rdd_bipartite_types.show" )
+    print( "draw_utils draw_igraph_bipartite -- rdd_bipartite_types.show" )
     rdd_bipartite_types = df.rdd.map( lambda x: (x.src, x.dst,"1") )
     df_types = rdd_bipartite_types.toDF()#"src","dst","edge","count")
     df_types.show()
 
-    print( "gf_utils draw_igraph_bipartite --" )
-    igb = Graph.Bipartite(df_types.select("_3"),df_types.select("_1","_2"), directed=False )
+    print( "draw_utils draw_igraph_bipartite --" )
+    igb = Graph.Bipartite(df_types.select("_3"),df_types.groupBy("_1","_2"), directed=False )
 
 
     plot( igb,layout=layout_as_bipartite)

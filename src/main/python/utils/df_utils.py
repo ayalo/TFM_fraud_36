@@ -102,13 +102,13 @@ def get_edges_domip(df):
     :return: df_edges
     """
     print( "df_utils get_edges_domip-- : df" )
-    df.show()
+    #df.show()
     df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
     print( "df_utils get_edges_domip-- :df_edges_count" )
-    df_edges_count.show()
+    #df_edges_count.show()
     df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
     print( "df_utils get_edges_domip-- :df_edges" )
-    df_edges.show()
+    #df_edges.show()
 
     return df_edges
 
@@ -120,7 +120,7 @@ def get_edges_domdom(df):
     :return: df_edges
     """
     print( "df_utils get_edges_domdom -- df que llega ..." )
-    df.show()
+    #df.show()
     # df.printSchema()
 
     df_edges_DD_exists = df.select( df.a, df.c,
@@ -133,6 +133,6 @@ def get_edges_domdom(df):
 
     df_edges = get_edges( df_edges_DD_exists, "a", "c", "edge_ratio" )
     print( "df_utils get_edges_domdom -- df_edges calculado ..." )
-    df_edges.show()
+    #df_edges.show()
 
     return df_edges

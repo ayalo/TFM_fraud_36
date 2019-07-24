@@ -5,6 +5,7 @@ from utils.gf_utils import *
 from utils.df_utils import *
 from utils.draw_utils import *
 from utils.spark_utils import *
+from utils.read_write_utils import *
 
 def main():
     '''Program entry point'''
@@ -43,7 +44,7 @@ def main():
     spark = spark_session()
     # df = spark.createDataFrame( data )
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
-        "/Users/olaya/Documents/Master/TFM/Datos/ssp_bid_compressed_000000000499.csv.gz" )
+        "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_000000000499.csv.gz" )
 
     print( "DomainDomainGraph MAIN -- Pintamos Dataframe completo:" )
     # df.show()
@@ -52,32 +53,34 @@ def main():
     df = clean( df,"referrer_domain","user_ip")
 
     # g= src.main.python.DomainIpGraph.get_graph(df)
-    g_domip = get_graph_domip( df, 15 ).persist()
+    gf_domip = get_graph_domip( df, 5 ) #.persist()
     print( "DomainDomainGraph MAIN -- triplets " )
     # g_domip.triplets.show( 100, False )
 
-    gf = get_graph_domdom( g_domip ).persist()
+    gf_domdom = get_graph_domdom( gf_domip ) #.persist()
 
     ##draw_igraph( gf )
 
-    ig, visual_style = draw_igraph( gf )
+    ig, visual_style = draw_igraph_domain_domain( gf_domdom )
 
-    igraph_plot(ig,visual_style)
+    #igraph_plot(ig,visual_style)
+    plot( ig, **visual_style )
+
 
 '''
     #TODO:: mover a un notebook
 
-    gf.edges.write.parquet("saved_graph/edges_prueba")
+    gf.edges.write.parquet("../saved_graph/edges_prueba")
 
-    gf.vertices.write.parquet("saved_graph/vert_prueba")
+    gf.vertices.write.parquet("../saved_graph/vert_prueba")
 
     draw_igraph( gf )
 
     # TODO:: mover a una clase solo
 
-    ed_2 = spark.read.parquet("saved_graph/edges_prueba")
+    ed_2 = spark.read.parquet("../saved_graph/edges_prueba")
 
-    ver_2 = spark.read.parquet("saved_graph/vert_prueba")
+    ver_2 = spark.read.parquet("../saved_graph/vert_prueba")
 
 
     gf_2 =  GraphFrame(ver_2,ed_2)
