@@ -53,19 +53,19 @@ def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y D
     return df_cleaned_format
 
 
-def get_vertices(df_edges, a, b): #cui
+def get_vertices(df_edges, a, b):  # cui
     print( "df_utils get_vertices-- :" )
 
     df_dom = df_edges.select( col( f"{a}" ).alias( "id" ) )
-    df_ip =  df_edges.select( col( f"{b}" ).alias( "id" ) )
+    df_ip = df_edges.select( col( f"{b}" ).alias( "id" ) )
 
     print( "df_utils get_vertices-- df_vertices_withduplicates :" )
     df_vertices_withduplicates = df_dom.union( df_ip )
-    #df_vertices_withduplicates.show()
+    # df_vertices_withduplicates.show()
 
     print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
     df_vertices = df_vertices_withduplicates.dropDuplicates()
-    #df_vertices.show()
+    # df_vertices.show()
 
     return df_vertices
 
@@ -102,13 +102,13 @@ def get_edges_domip(df):
     :return: df_edges
     """
     print( "df_utils get_edges_domip-- : df" )
-    #df.show()
+    # df.show()
     df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
     print( "df_utils get_edges_domip-- :df_edges_count" )
-    #df_edges_count.show()
+    # df_edges_count.show()
     df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
     print( "df_utils get_edges_domip-- :df_edges" )
-    #df_edges.show()
+    # df_edges.show()
 
     return df_edges
 
@@ -120,11 +120,18 @@ def get_edges_domdom(df):
     :return: df_edges
     """
     print( "df_utils get_edges_domdom -- df que llega ..." )
-    #df.show()
+    # df.show()
     # df.printSchema()
 
+    # this is only for fitler all suspicius domains
+    '''
     df_edges_DD_exists = df.select( df.a, df.c,
                                     F.when( df['edge_ratio'] > 0.5, 1 ).otherwise( 0 ).alias(
+                                        "edge_ratio" ) )  # .show()
+                                        '''
+    '''getting the complete graph with suspicious and normal nodes :'''
+    df_edges_DD_exists = df.select( df.a, df.c,
+                                    F.lit(1).alias(
                                         "edge_ratio" ) )  # .show()
 
     df_edges_DD_exists.printSchema()
@@ -133,6 +140,6 @@ def get_edges_domdom(df):
 
     df_edges = get_edges( df_edges_DD_exists, "a", "c", "edge_ratio" )
     print( "df_utils get_edges_domdom -- df_edges calculado ..." )
-    #df_edges.show()
+    # df_edges.show()
 
     return df_edges

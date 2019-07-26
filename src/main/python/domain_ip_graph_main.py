@@ -53,29 +53,26 @@ def main():
     print( "DomainIpGraph MAIN-- Pintamos Dataframe completo ..." )
     # df.show()
 
-    print( "DomainIpGraph MAIN-- clean ..." )
-    df_cleaned = clean( df,"referrer_domain","user_ip" )
-    print( "DomainIpGraph MAIN--cleaned df ..." )
+    print( "DomainIpGraph MAIN--  cleanning dataframe ..." )
+    df_cleaned = df_clean( df,"referrer_domain","user_ip" )
+    #print( "DomainIpGraph MAIN--cleaned df ..." )
     # df.show()
     print( "DomainIpGraph MAIN--get graph DI ... with a filter where the nodes with less than 15 visits: " )
     gf_domip = get_graph_domip( df_cleaned, 15 )
 
-    # Completed - SAVED graph builded with 5 files of 200M day date 180208
-    ##gf_write( gf_domip, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_ip_all_180208" )
-
-
     print( "DomainIpGraph MAIN-- Draw using igraph  OJO CAMBIaR ESTO..." )
     ig, visual_style = draw_igraph_domain_ip( gf_domip )
-    plot( ig, **visual_style )
-
+    #plot( ig, **visual_style )
+    plot( ig, **visual_style ).save(
+        "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip.png" )
 
     ##draw_bp_igraph(gf) # FALTA POR HACER
     #print( "main -- Draw using nx.Graph -- all graph:" )
     #draw_nx( gf_domip.edges )
 
-    print( "main -- Draw using nx.Graph -- only the nodes with more than 80 visits:" )
-    df_domip_to_print = gf_domip.edges.filter( gf_domip.edges.edge_weight > 80 )
-    draw_nx( df_domip_to_print )
+    #print( "main -- Draw using nx.Graph -- only the nodes with more than 80 visits:" )
+    #df_domip_to_print = gf_domip.edges.filter( gf_domip.edges.edge_weight > 80 )
+    #draw_nx( df_domip_to_print )
 
     return gf_domip
 

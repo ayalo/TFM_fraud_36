@@ -12,6 +12,10 @@ def domain_cleaner(domain):
     :arg domain : String
     :return: cleaned_domain
     """
+    #print ("domain_cleaner -- domain_cleaner -- domain.lower : ")
+    if not domain:
+        return domain
+
     domain = domain.lower()
     dirty_string = re.sub( "www.|.www|https:\/\/|http:\/\/|\"|\'", "", domain )  ##.lower()
     if domain.isdigit():
