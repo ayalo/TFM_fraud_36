@@ -47,7 +47,7 @@ def main():
 
     # Intialize a spark context
     spark = spark_session()
-    df = spark.createDataFrame( data )
+    #df = spark.createDataFrame( data )
 
     '''
     # SAVING gf_dom_ip graph locally
@@ -73,51 +73,59 @@ def main():
     '''
 
     # LOAD LOCALLY DATA
-    gf_domip = gf_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_ip" )
-    df_degree_ratio = df_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/df_degree_ratio" )
-    #gf_domdom = gf_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_domain" )
+    gf_domip = gf_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_ip_all_180208" )
+    df_degree_ratio = df_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/df_degree_ratio_all_180208" )
+    gf_domdom = gf_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_domain_all_180208" )
 
     # g_domip=gf_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_ip" )
     # df_degree_ratio = get_df_degree_ratio( g_domip )
     # df_write_csv( df_degree_ratio,"/Users/olaya/Documents/Master/TFM/output_fraud/df_degree_ratio_csv_prueba")
     # 'CSV data source does not support struct<id:string> data type.;'
 
+
     print( "plots_main MAIN-- calculando doms_more_visited : show todo.." )
-    sorted_degrees = gf_most_visited( gf_domip ).limit( 4 )
-    sorted_degrees.printSchema()
-
-    print( "plots_main MAIN-- prueba" )
+    sorted_degrees = gf_top_most_visited(gf_domip,4)
+    sorted_degrees.show()
 
 
-    ### TODO : REVISAR TODO LO ANTERIOR
+    ### TODO : REVISAR
 
-
+    print( "plots_main MAIN-- Calculando primer histograma --  draw_log_hist -- ..." )
     total_degrees = gf_domip.degrees
     print( f" type  {type( total_degrees )}  " )
     sorted_degrees = total_degrees.orderBy( F.desc( "degree" ) )
 
     degree, id = zip(*[(item.degree, item.id) for item in sorted_degrees.select( "degree", "id" ).collect()] )
 
-    draw_log_hist( degree, [1, 10, 100, 200] )
+    draw_log_hist( degree, [1, 10, 50, 100, 200, 300, 400],"/Users/olaya/Documents/Master/TFM/output_fraud/log_hist_plot.png" )
+
+
+    print( "plots_main MAIN-- Calculando segundo histograma --  draw_minor_than_list -- ..." )
+
 
     list_tope = [400, 300, 200, 100, 50, 10]
-    draw_minor_than_list( degree, list_tope )
+    draw_minor_than_list( degree, list_tope,"/Users/olaya/Documents/Master/TFM/output_fraud/minor_than_list_plot.png" )
 
+
+
+    print( "plots_main MAIN-- Calculando segundo histograma --  draw_overlap_matrix  -- list_top_suspicious ..." )
     top50_suspicious = df_degree_ratio.filter(
         "edge_ratio>0.5 and count_ips_in_common>1  " ).select(
         df_degree_ratio.a.id, df_degree_ratio.outDegree ).distinct().sort( F.desc( "outDegree" ) ).take( 50 )
 
     list_top_suspicious = [row["a.id"] for row in top50_suspicious]
+    draw_overlap_matrix( df_degree_ratio, list_top_suspicious,"/Users/olaya/Documents/Master/TFM/output_fraud/overlap_list_top_suspicious.pdf" )
 
-    draw_overlap_matrix( df_degree_ratio, list_top_suspicious )
-
+    print( "plots_main MAIN-- Calculando segundo histograma --  draw_overlap_matrix  -- list_sample ..." )
     sample_50_percent = df_degree_ratio.select( F.col( "a.id" ) ).distinct().sample( 0.2 ).take( 50 )
 
     # cojo un 20% de datos totales (dominios unicos) de la muestra de manera aleatoria
-
     list_sample = [row["id"] for row in sample_50_percent]
+    draw_overlap_matrix( df_degree_ratio, list_sample,"/Users/olaya/Documents/Master/TFM/output_fraud/overlap_list_sample.pdf" )
 
-    draw_overlap_matrix( df_degree_ratio, list_sample )
+
+
+
 
 if __name__ == "__main__":
     main()

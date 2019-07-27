@@ -4,11 +4,11 @@ from utils.df_utils import *
 from pyspark.sql import functions as F
 
 
-def gf_filter(g, min_edge):  # filtar count>15 visitas  en el grafo. Devuelve un grafo # Usada en DI y DD
+def gf_filter_dom_ip_edges(g, min_edge):  # filtar count>15 visitas  en el grafo. Devuelve un grafo # Usada en DI y DD
     """
     Function to select only the nodes in the graph with more than a given weight passed as parameter, in order
     to filter non relevant data to construct an smaller graph .
-    :param g: original GraphFrame
+    :param g: original gf_dom_ip GraphFrame
     :param min_edge: value to dismiss all the nodes on g below the limit_edge value . limit_edge value indicate the
             number of visits domain-ip (if for a src - dst tuple : edge_weight <  limit_edge this row is discarded)
     :return gf_filtered: GraphFrame generated with
@@ -38,7 +38,7 @@ def get_graph_domip(df, min_edge):
 
     gf = GraphFrame( df_vertices, df_edges )  # get_graph(df_vertices,df_edges)
 
-    gf_filtered = gf_filter( gf, min_edge )
+    gf_filtered = gf_filter_dom_ip_edges( gf, min_edge )
 
     return gf_filtered
 
@@ -116,10 +116,10 @@ def get_graph_domdom(g_domip):
     return gf
 
 
-def gf_most_visited(gf):
+def gf_top_most_visited(gf,top=None):  #decir luis que quiero pasar el top como argumento que se pueda y que no
     """
     Using the graphframe function 'degrees', calculate the most visited vertices.
-    :param gf_dom_dom:  grapframe
+    :param gf:  grapframe
     :return: sorted_degrees
     """
     # hacerlo tb con el grafo dom-ip get_outDegree y sacar un ranking
@@ -128,12 +128,12 @@ def gf_most_visited(gf):
     total_degrees = gf.degrees
     print( f" type  {type( total_degrees )}  " )
     sorted_degrees = total_degrees.orderBy( F.desc( "degree" ) )
-    print( "gf_utils doms_more_visited -- sorted_degrees.show .. " )
-    sorted_degrees.show()
+    print( "gf_utils gf_top_most_visited -- sorted_degrees.show .. " )
 
     # TODO VER COMO SE PUEDE IMPRIMIR o revisar o quitar
     # top20_outDegrees=outDegree.sort( "outDegree", ascending=False ).head(20)
-
-    return sorted_degrees
+    if top is None:
+        return sorted_degrees
+    return sorted_degrees.limit(top)
 
 # TODO def doms_or_ip_more_visited(gf_dom_ip):

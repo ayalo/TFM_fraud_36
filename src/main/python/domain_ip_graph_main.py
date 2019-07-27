@@ -48,17 +48,17 @@ def main():
     spark = spark_session()
     #df = spark.createDataFrame( data )
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
-        "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_00000000049*.csv.gz" )
+        "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_000000000492.csv.gz" )
 
     print( "DomainIpGraph MAIN-- Pintamos Dataframe completo ..." )
     # df.show()
 
     print( "DomainIpGraph MAIN--  cleanning dataframe ..." )
-    df_cleaned = df_clean( df,"referrer_domain","user_ip" )
+    df_cleaned = clean( df,"referrer_domain","user_ip" )
     #print( "DomainIpGraph MAIN--cleaned df ..." )
     # df.show()
     print( "DomainIpGraph MAIN--get graph DI ... with a filter where the nodes with less than 15 visits: " )
-    gf_domip = get_graph_domip( df_cleaned, 15 )
+    gf_domip = get_graph_domip( df_cleaned, 80 )
 
     print( "DomainIpGraph MAIN-- Draw using igraph  OJO CAMBIaR ESTO..." )
     ig, visual_style = draw_igraph_domain_ip( gf_domip )
@@ -72,7 +72,8 @@ def main():
 
     #print( "main -- Draw using nx.Graph -- only the nodes with more than 80 visits:" )
     #df_domip_to_print = gf_domip.edges.filter( gf_domip.edges.edge_weight > 80 )
-    #draw_nx( df_domip_to_print )
+    #gf_domip_to_print = gf_filter_dom_ip_edges (gf_domip,80)
+    draw_nx( gf_domip.edges )
 
     return gf_domip
 

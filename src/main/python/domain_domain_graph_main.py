@@ -15,7 +15,7 @@ def main():
 
     # df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
     # "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_000000000491.csv.gz" )
-    df = (spark.read.csv( "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_000000000493.csv.gz",
+    df = (spark.read.csv( "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_000000000499.csv.gz",
                           header="true", timestampFormat="yyyy-MM-dd HH:mm:ss", escape='"',
                           ignoreLeadingWhiteSpace="true", ignoreTrailingWhiteSpace="true", mode="FAILFAST" ).select(
         "user_ip", "referrer_domain" ))
@@ -37,7 +37,7 @@ def main():
     # plot( ig, visual_style)
 
     plot( ig, **visual_style ).save(
-        "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domdom_491.png" )
+        "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domdom_499.png" )
 
 
 if __name__ == "__main__":

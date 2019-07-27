@@ -9,6 +9,7 @@ from pyspark.sql import functions as F
 from pyspark.sql.functions import col
 
 
+
 def draw_nx(df_edges):  # usada en DI y DD, no funciona con muchos datos
     """
     Function to plot a bipartite graph with networkx
@@ -97,7 +98,7 @@ def draw_igraph(g):  ##usada en DI y DD TODO : borrarla
     visual_style["main"] = "-- igraph plot :"
     plot( ig2, **visual_style )
 '''
-def draw_igraph_domain_domain(g):  ##usada en DI y DD
+def draw_igraph_domain_domain(g_domdom):  ##usada en DI y DD
     """
     Version: 1.0
     Function to plot a dispersion of nodes (TupleList) in a graph with igraph
@@ -107,8 +108,10 @@ def draw_igraph_domain_domain(g):  ##usada en DI y DD
     #from igraph import Graph
 
     print( "draw_utils draw_igraph --" )
+    edges=g_domdom.edges.select( F.col( "src.id" ).alias( "src" ), F.col( "dst.id" ).alias( "dst" ),
+                            F.col( "edge_weight" ) ).collect()
 
-    ig = Graph.TupleList( g.edges.collect(), directed=True )
+    ig = Graph.TupleList( edges, directed=True )
     visual_style = {}
     N_vertices = ig.vcount()
 
@@ -164,44 +167,8 @@ def draw_igraph_domain_ip(g):
 
     return ig, visual_style
 
-'''
-def igraph_plot (ig,visual_style):
 
-    from igraph import plot
-
-    plot( ig, **visual_style )
-'''
-
-def draw_bp_igraph(g):  ## TODO idem que la anterior
-    """
-    Function to plot a dispersion of nodes (Bipartite) in a graph with igraph
-    Bipartite graph
-    :param g: GraphFrame
-    :return: ploted graph
-    """
-    from igraph import Graph
-    from igraph import plot
-
-    #print( "gf_utils draw_igraph_bipartite -- triplets.show" )
-
-    #g.triplets.show()
-
-    df= g.triplets # format [src,edge,dst]
-
-    print( "draw_utils draw_igraph_bipartite -- rdd_bipartite_types.show" )
-    rdd_bipartite_types = df.rdd.map( lambda x: (x.src, x.dst,"1") )
-    df_types = rdd_bipartite_types.toDF()#"src","dst","edge","count")
-    df_types.show()
-
-    print( "draw_utils draw_igraph_bipartite --" )
-    igb = Graph.Bipartite(df_types.select("_3"),df_types.groupBy("_1","_2"), directed=False )
-
-
-    plot( igb,layout=layout_as_bipartite)
-
-
-
-def draw_log_hist(degree, bins=10):
+def draw_log_hist(degree, bins=10,path=None):
     '''
     degree : node degree
     bins: division del histograma, dos formas
@@ -217,13 +184,19 @@ def draw_log_hist(degree, bins=10):
     ESCALA LOGARITMICA
 
     '''
+    print( "draw_utils draw_log_hist -- --" )
+
     degree = np.array( degree )
     hist_y, hist_x = np.histogram( degree, bins )
     label_x = [str( int( hist_x[i] ) ) + "-" + str( int( hist_x[i + 1] ) ) for i in range( hist_x.shape[0] - 1 )]
+
+    if f"{path}" is not None:
+        plt.savefig( f"{path}" )
+
     plt.bar( label_x, np.log( hist_y + 1 ) )
 
 
-def draw_minor_than_list(degree, list_tope):
+def draw_minor_than_list(degree, list_tope,path=None):
     '''
 
     degree : degree a pintar
@@ -232,18 +205,25 @@ def draw_minor_than_list(degree, list_tope):
     cuantos hay menores que 400, menores que 300 , menores que 200 ....
 
     '''
+    print( "draw_utils draw_minor_than_list -- --" )
+
     degree = np.array( degree )
     count_elemnt = [np.sum( degree <= tope ) for tope in list_tope]
     label_y = [str( t ) for t in list_tope]
+
+    if f"{path}" is not None:
+        plt.savefig( f"{path}" )
+
     plt.bar( label_y, count_elemnt )
 
 
-def draw_overlap_matrix(df_degree_ratio, list_top_suspicious):
+def draw_overlap_matrix(df_degree_ratio, list_top_suspicious,path=None):
     '''
     df_degree_ratio
     top_suspicious : number of top suspicious domains to plot
 
     '''
+    print( "draw_utils draw_overlap_matrix -- --" )
 
     matrix_src_dsc = df_degree_ratio.filter(
         (F.col( "a.id" ).isin( list_top_suspicious )) & (F.col( "c.id" ).isin( list_top_suspicious )) ).select(
@@ -270,3 +250,6 @@ def draw_overlap_matrix(df_degree_ratio, list_top_suspicious):
 
     ax.xaxis.set_major_locator( ticker.MultipleLocator( 1 ) )
     ax.yaxis.set_major_locator( ticker.MultipleLocator( 1 ) )
+    if f"{path}" is not None:
+        fig.savefig( f"{path}",format='pdf')
+
