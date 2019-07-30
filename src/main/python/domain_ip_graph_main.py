@@ -61,10 +61,10 @@ def main():
     gf_domip = get_graph_domip( df_cleaned, 80 )
 
     print( "DomainIpGraph MAIN-- Draw using igraph  OJO CAMBIaR ESTO..." )
-    ig, visual_style = draw_igraph_domain_ip( gf_domip )
+    #ig, visual_style = draw_igraph_domain_ip( gf_domip )
     #plot( ig, **visual_style )
-    plot( ig, **visual_style ).save(
-        "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip.png" )
+    #plot( ig, **visual_style ).save(
+    #   "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip.png" )
 
     ##draw_bp_igraph(gf) # FALTA POR HACER
     #print( "main -- Draw using nx.Graph -- all graph:" )
@@ -73,7 +73,7 @@ def main():
     #print( "main -- Draw using nx.Graph -- only the nodes with more than 80 visits:" )
     #df_domip_to_print = gf_domip.edges.filter( gf_domip.edges.edge_weight > 80 )
     #gf_domip_to_print = gf_filter_dom_ip_edges (gf_domip,80)
-    draw_nx( gf_domip.edges )
+    draw_nx( gf_domip.edges,"/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip_nx.png")
 
     return gf_domip
 

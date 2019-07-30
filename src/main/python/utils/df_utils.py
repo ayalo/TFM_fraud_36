@@ -130,16 +130,42 @@ def get_edges_domdom(df):
                                         "edge_ratio" ) )  # .show()
                                         '''
     '''getting the complete graph with suspicious and normal nodes :'''
-    df_edges_DD_exists = df.select( df.a, df.c,
-                                    F.lit(1).alias(
-                                        "edge_ratio" ) )  # .show()
+    #df_edges_DD_exists = df.select( df.a, df.c,
+     #                               F.lit(1).alias(
+     #                                   "edge_ratio" ) )  # .show()
+    df_edges_DD_exists = df.select( df.a, df.c,df.edge_ratio)
 
-    df_edges_DD_exists.printSchema()
 
-    print( "df_utils get_edges_domdom -- antes get_edges ..." )
+    #df_edges_DD_exists.printSchema()
+
+    #print( "df_utils get_edges_domdom -- antes get_edges ..." )
 
     df_edges = get_edges( df_edges_DD_exists, "a", "c", "edge_ratio" )
     print( "df_utils get_edges_domdom -- df_edges calculado ..." )
-    # df_edges.show()
+    df_edges.show()
+
+    return df_edges
+
+def get_edges_domdom_malicious_ones(df):
+    """
+    Creating a df_edges to use GraphFrames
+    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :return: df_edges
+    """
+    print( "df_utils get_edges_domdom -- df que llega ..." )
+    # df.show()
+    # df.printSchema()
+
+    # this is only for fitler all suspicius domains
+
+    df_edges_DD_exists = df.select( df.a, df.c,
+                                    F.when( df['edge_ratio'] > 0.5, 1 ).otherwise( 0 ).alias(
+                                        "edge_ratio" ) )  # .show()
+
+    #print( "df_utils get_edges_domdom -- antes get_edges ..." )
+
+    df_edges = get_edges( df_edges_DD_exists, "a", "c", "edge_ratio" )
+    print( "df_utils get_edges_domdom_malicious_ones -- df_edges calculado MALICIOUS..." )
+    df_edges.show()
 
     return df_edges

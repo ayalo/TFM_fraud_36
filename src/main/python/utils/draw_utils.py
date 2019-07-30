@@ -10,7 +10,7 @@ from pyspark.sql.functions import col
 
 
 
-def draw_nx(df_edges):  # usada en DI y DD, no funciona con muchos datos
+def draw_nx(df_edges,path=None):  # usada en DI y DD, no funciona con muchos datos
     """
     Function to plot a bipartite graph with networkx
     :param df_edges: df_edges from a GraphFrame
@@ -49,9 +49,23 @@ def draw_nx(df_edges):  # usada en DI y DD, no funciona con muchos datos
     print( "draw_utils draw_nx -- -- despues de pos.update" )
     nx.draw( B, pos, with_labels=False )
     for p in pos:  # raise text positions
-        pos[p][1] += 0.10
+        pos[p][1] += 0.20
     print( "draw_utils draw_nx -- -- despues for " )
     nx.draw_networkx_labels( B, pos )
+
+    #Probando margenes
+    x_values, y_values = zip( *pos.values() )
+    x_max = max( x_values )
+    x_min = min( x_values )
+    x_margin = (x_max - x_min) * 0.25
+    y_max = max( y_values )
+    y_min = min( y_values )
+    y_margin = (y_max - y_min) * 0.7
+    plt.xlim( x_min - x_margin, x_max + x_margin, y_min - y_margin, y_max + y_margin )
+    #fin probando margenes
+
+    if f"{path}" is not None:
+        plt.savefig( f"{path}" )
     print( "draw_utils draw_nx -- -- ante de plot" )
     plt.show()
 
@@ -108,19 +122,28 @@ def draw_igraph_domain_domain(g_domdom):  ##usada en DI y DD
     #from igraph import Graph
 
     print( "draw_utils draw_igraph --" )
-    edges=g_domdom.edges.select( F.col( "src.id" ).alias( "src" ), F.col( "dst.id" ).alias( "dst" ),
-                            F.col( "edge_weight" ) ).collect()
-
-    ig = Graph.TupleList( edges, directed=True )
+    edges = g_domdom.edges.select( F.col( "src.id" ).alias( "src" ), F.col( "dst.id" ).alias( "dst" ),
+                                   F.col( "edge_weight" ) ).collect()
+    # METER edge_weight a FLOAT round(a, 4)
+    ig = Graph.TupleList( edges, directed=True, weights=True )
     visual_style = {}
     N_vertices = ig.vcount()
 
-    layout = ig.layout( "kk" )
+    print( ig.es["weight"] )
+    print( f" is weighted {ig.is_weighted()} " )
+    # layout = ig.layout( "kk" )
+    # layout= layout_kamada_kawai(weights=[r["edge_weight"] for r in edges] )
+    #layout = ig.layout_fruchterman_reingold( weights=["{:.2f}".format(r["edge_weight"]) for r in edges],  maxiter=1000, area=N_vertices**3, repulserad=N_vertices**3)
+    layout = ig.layout_fruchterman_reingold( weights=[r["edge_weight"] for r in edges],  maxiter=1000, area=N_vertices**3, repulserad=N_vertices**3)
+
+    # layout = ig.layout_sugiyama(weights=[ r["edge_weight"] for r in edges])
     colors = ["lightgray", "cyan", "magenta", "yellow", "blue", "green", "red"]
     for component in ig.components():
         color = colors[min( 6, len( component ) - 1 )]
         for vidx in component: ig.vs[vidx]["color"] = color
 
+    ig.es["label"] = ig.es.get_attribute_values("weight")
+    visual_style["autocurve"] = True
     visual_style["vertex_size"] = 20
     visual_style["vertex_label"] = ig.vs["name"]
     visual_style["vertex_label_size"] = 14
@@ -129,7 +152,7 @@ def draw_igraph_domain_domain(g_domdom):  ##usada en DI y DD
     visual_style["layout"] = layout
     visual_style["bbox"] = (20 * N_vertices, 20 * N_vertices)  # (600,600)
     visual_style["margin"] = 50
-    #visual_style["main"] = "-- igraph plot :"
+    # visual_style["main"] = "-- igraph plot :"
 
     return ig, visual_style
 
@@ -217,37 +240,31 @@ def draw_minor_than_list(degree, list_tope,path=None):
     plt.bar( label_y, count_elemnt )
 
 
-def draw_overlap_matrix(df_degree_ratio, list_top_suspicious,path=None):
+def draw_overlap_matrix(df_degree_ratio, list_top_suspicious,figsize=(10,10),path=None):
     '''
     df_degree_ratio
     top_suspicious : number of top suspicious domains to plot
-
     '''
-    print( "draw_utils draw_overlap_matrix -- --" )
-
+    import matplotlib.ticker as ticker
     matrix_src_dsc = df_degree_ratio.filter(
         (F.col( "a.id" ).isin( list_top_suspicious )) & (F.col( "c.id" ).isin( list_top_suspicious )) ).select(
         F.col( "a.id" ).alias( "src" ), F.col( "c.id" ).alias( "dst" ), F.col( "edge_ratio" ) ).collect()
-
-    dom_idx = dict( [(v, k) for k, v in enumerate( list_top_suspicious )] )# diccionario con indice-dominio y lo invierto
+    dom_idx = dict(
+        [(v, k) for k, v in enumerate( list_top_suspicious )] )  # diccionario con indice-dominio y lo invierto
     # para que me lo de dominio-indice de la matriz
-
-    dom_matrix = np.eye( len( list_top_suspicious ) )
-
-    for s, d, e in matrix_src_dsc:
+    dom_matrix = np.eye(
+        len( list_top_suspicious ) )  # matriz con diagonal en 1's de la long de la lista de top_susp
+    for s, d, e in matrix_src_dsc:  # relleno la matriz con los valores
         dom_matrix[dom_idx[s], dom_idx[d]] = e
-
-    fig = plt.figure()
-
+    fig = plt.figure( figsize=figsize )  # tamaño de la matriz
     # fig.suptitle("Overlap domain matriz")
     ax = fig.add_subplot( 111 )
     cax = ax.matshow( dom_matrix )
     fig.colorbar( cax )
-
     # Set up axes
+    # el primero vacio porque si no no pinta el q esta en la posicion 0
     ax.set_xticklabels( [''] + list_top_suspicious, rotation=90 )
     ax.set_yticklabels( [''] + list_top_suspicious )
-
     ax.xaxis.set_major_locator( ticker.MultipleLocator( 1 ) )
     ax.yaxis.set_major_locator( ticker.MultipleLocator( 1 ) )
     if f"{path}" is not None:

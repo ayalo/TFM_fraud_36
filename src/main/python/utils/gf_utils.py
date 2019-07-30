@@ -109,11 +109,19 @@ def get_graph_domdom(g_domip):
 
     df_edges = get_edges_domdom( df_degree_ratio )
     df_vertices = get_vertices( df_edges, "src", "dst" )
-    print( "DomainDomainGraph get_graph_domdom --  df_vertices removed duplicates : " )
+    print( "DomainDomainGraph get_graph_domdom --  df_edges  gf_total_nodes OLAYAs : " )
+    df_edges.show()
 
-    gf = GraphFrame( df_vertices, df_edges )
+    gf_total_nodes = GraphFrame( df_vertices, df_edges )
 
-    return gf
+    df_edges = get_edges_domdom_malicious_ones( df_degree_ratio )
+    df_vertices = get_vertices( df_edges, "src", "dst" )
+    print( "DomainDomainGraph get_graph_domdom --  df_edges gf_malicious_nodes OLAYAs : " )
+    df_edges.show()
+
+    gf_malicious_nodes = GraphFrame( df_vertices, df_edges )
+
+    return gf_total_nodes,gf_malicious_nodes
 
 
 def gf_top_most_visited(gf,top=None):  #decir luis que quiero pasar el top como argumento que se pueda y que no
@@ -137,3 +145,13 @@ def gf_top_most_visited(gf,top=None):  #decir luis que quiero pasar el top como 
     return sorted_degrees.limit(top)
 
 # TODO def doms_or_ip_more_visited(gf_dom_ip):
+
+def gf_filter_Edge(gf,src):
+    """
+
+    :param gf:
+    :param src:
+    :return:
+    """
+    return gf.filterEdges(f"src='{src}'")
+
