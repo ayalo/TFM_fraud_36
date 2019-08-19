@@ -14,7 +14,9 @@ def draw_nx(df_edges,path=None):  # usada en DI y DD, no funciona con muchos dat
     """
     Function to plot a bipartite graph with networkx
     :param df_edges: df_edges from a GraphFrame
+    :param path=None
     :return: ploted graph
+
     """
 
     #import networkx as nx
@@ -129,11 +131,12 @@ def draw_igraph_domain_domain(g_domdom):  ##usada en DI y DD
     visual_style = {}
     N_vertices = ig.vcount()
 
-    print( ig.es["weight"] )
-    print( f" is weighted {ig.is_weighted()} " )
+    #print( ig.es["weight"] )
+    #print( f" is weighted {ig.is_weighted()} " )
     # layout = ig.layout( "kk" )
     # layout= layout_kamada_kawai(weights=[r["edge_weight"] for r in edges] )
     #layout = ig.layout_fruchterman_reingold( weights=["{:.2f}".format(r["edge_weight"]) for r in edges],  maxiter=1000, area=N_vertices**3, repulserad=N_vertices**3)
+    # TODO ValueError: iterable must yield numbers - Precision del float para el peso del grafo
     layout = ig.layout_fruchterman_reingold( weights=[r["edge_weight"] for r in edges],  maxiter=1000, area=N_vertices**3, repulserad=N_vertices**3)
 
     # layout = ig.layout_sugiyama(weights=[ r["edge_weight"] for r in edges])

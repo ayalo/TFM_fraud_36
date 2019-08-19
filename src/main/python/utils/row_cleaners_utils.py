@@ -12,6 +12,10 @@ def domain_cleaner(domain):
     :arg domain : String
     :return: cleaned_domain
     """
+
+    #TODO limpiar dominios tipo : "imgur.mobile}", "picsart.studio}", "wp.wattpad}", "seven.fitness.workout}"
+    # Quitar llave del final.
+
     #print ("domain_cleaner -- domain_cleaner -- domain.lower : ")
     if not domain:
         return domain

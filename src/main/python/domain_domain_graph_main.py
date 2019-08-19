@@ -20,6 +20,7 @@ def main():
     #                      header="true", timestampFormat="yyyy-MM-dd HH:mm:ss", escape='"',
     #                      ignoreLeadingWhiteSpace="true", ignoreTrailingWhiteSpace="true", mode="FAILFAST" ).select(
     #    "user_ip", "referrer_domain" ))
+    '''
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
         "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_*.csv.gz" )
 
@@ -44,8 +45,6 @@ def main():
 
     # gf_write_parquet( gf_domdom, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_domain_weighted" )
 
-    ####gf_domdom = gf_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_domain_weighted" ) ## ojo no es pesado
-
     ig, visual_style = draw_igraph_domain_domain( gf_domdom_total )
     plot( ig, **visual_style ).save(
         "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domdom_491_total.png" )
@@ -53,7 +52,12 @@ def main():
     ig, visual_style = draw_igraph_domain_domain( gf_domdom_malicious )
     plot( ig, **visual_style ).save(
         "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domdom_491_malicious.png" )
+    '''
 
+    gf_domdom = gf_read_parquet( spark, "/Users/olaya/Documents/Master/TFM/output_fraud/graph_domain_domain_weighted" ) ## ojo no es pesado
+    ig, visual_style = draw_igraph_domain_domain( gf_domdom )
+    plot( ig, **visual_style ).save(
+        "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domdom_weighted_rounded.png" )
 
 if __name__ == "__main__":
     main()
