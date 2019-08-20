@@ -15,8 +15,10 @@ def main():
     :return gf : graph graphframe Domain-IP bipartite relation
     '''
 
-    # Intialize a spark context
-    # with F.SparkContext( "local", "PySparCreateDataframe" ) as spark:
+    '''
+    Code to generate an small dataframe called data with an specific structure
+    '''
+    '''
     data = pd.DataFrame(
         {'referrer_domain': ['example.org',
                              'site.com',
@@ -45,35 +47,51 @@ def main():
                      '10.20.30.42',
                      '30.50.70.90']} )
     # 'subdomain': ['test1', 'something', 'test2', 'test3', 'else', 'else', 'else', 'else', 'else', 'else']} )
+    '''
+    # Intialize a spark context
     spark = spark_session()
+
+    #code to load the small dataframe called data, to use uncomment the followin line.
     #df = spark.createDataFrame( data )
+
+    '''
+    Code to read a dataframe from one file saved on disk
+    '''
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
         "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_000000000492.csv.gz" )
 
-    print( "DomainIpGraph MAIN-- Pintamos Dataframe completo ..." )
-    # df.show()
+    print( "DomainIpGraph MAIN-- Print complete Dataframe ..." )
+    df.show()
 
+    # Always first clean an normalize de data
     print( "DomainIpGraph MAIN--  cleanning dataframe ..." )
     df_cleaned = clean( df,"referrer_domain","user_ip" )
     #print( "DomainIpGraph MAIN--cleaned df ..." )
     # df.show()
-    print( "DomainIpGraph MAIN--get graph DI ... with a filter where the nodes with less than 15 visits: " )
+
+    # Generating the graphframe domain-ip
+    print( "DomainIpGraph MAIN--get graph DI ... with a filter where the nodes with less than 80 visits: " )
     gf_domip = get_graph_domip( df_cleaned, 80 )
 
-    print( "DomainIpGraph MAIN-- Draw using igraph  OJO CAMBIaR ESTO..." )
+    # code to obtain the igraph to plot from the Graphframe gf_domip
+    #print( "DomainIpGraph MAIN-- Draw using igraph ..." )
     #ig, visual_style = draw_igraph_domain_ip( gf_domip )
     #plot( ig, **visual_style )
+
+    # Code to plot and save the graph into disk
     #plot( ig, **visual_style ).save(
     #   "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip.png" )
 
-    ##draw_bp_igraph(gf) # FALTA POR HACER
-    #print( "main -- Draw using nx.Graph -- all graph:" )
-    #draw_nx( gf_domip.edges )
+    # code to plot the graph
+    print( "main -- Draw using nx.Graph -- all graph:" )
+    draw_nx( gf_domip.edges )
 
     #print( "main -- Draw using nx.Graph -- only the nodes with more than 80 visits:" )
     #df_domip_to_print = gf_domip.edges.filter( gf_domip.edges.edge_weight > 80 )
     #gf_domip_to_print = gf_filter_dom_ip_edges (gf_domip,80)
-    draw_nx( gf_domip.edges,"/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip_nx.png")
+
+    # Code to plot and save the graph into disk
+    #draw_nx( gf_domip.edges,"/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip_nx.png")
 
     return gf_domip
 

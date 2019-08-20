@@ -9,11 +9,11 @@ from utils.row_cleaners_utils import domain_cleaner
 from utils.row_cleaners_utils import ip_cleaner
 
 
-def is_string(s):  # usada en DI y DD
+def is_string(s):
     """
     Function that returns true if s is a string or false if not
-    The intention of this function is filter all the types into the df that have no boolean in 'referrer_domain'
-    or 'user_ip' columns, in order to clean the original data.
+    The intention of this function is filter all the types into the df that have no normalized type in 'referrer_domain'
+    or 'user_ip' columns, in order to clean the original dataset.
     :param s: string passed as an argument
     :return: boolean True/False
     """
@@ -24,7 +24,7 @@ def is_string(s):  # usada en DI y DD
 def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y DD (con el df original)
     """
     Function to clean the original data from df, eliminate or filter null, none, and other types that are not string in
-    'referrer_domain' or 'user_ip' columns, in order to clean the original data.
+    'referrer_domain' or 'user_ip' columns, in order to clean the original dataset.
     :param df:
     :param referrer_domain: first column to clean
     :param user_ip: second column to clean
@@ -40,7 +40,7 @@ def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y D
 
     # Adding new column to df with the normalized/filtered/cleaned user_ip : ip_cleaned
     udf_ipcleaner = udf( ip_cleaner, StringType() )
-    print( "df-utils clean-- Calculando df_cleaned_ip" )
+    #print( "df-utils clean-- Calculando df_cleaned_ip" )
     df_cleaned_ip = df.withColumn( 'ip_cleaned', udf_ipcleaner( df.user_ip ) )
 
     # Adding new column to df with the normalized/filtered/cleaned referrer_domain : domain_cleaned
@@ -53,17 +53,26 @@ def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y D
     return df_cleaned_format
 
 
-def get_vertices(df_edges, a, b):  # cui
+def get_vertices(df_edges, a, b):
+    """
+    Function to Rename the columns of  df_vertices in order to use GraphFrames [id].
+    This function renames the columns a and b with the alias id, and returns the dataframe df_vertices,
+    with a single column and with dropedDuplicates.
+    :param df_edges: dataframe of edges with format for a GraphFrames use (src,dst,edge_weight)
+    :param a: df column
+    :param b: df column
+    :return:
+    """
     print( "df_utils get_vertices-- :" )
 
     df_dom = df_edges.select( col( f"{a}" ).alias( "id" ) )
     df_ip = df_edges.select( col( f"{b}" ).alias( "id" ) )
 
-    print( "df_utils get_vertices-- df_vertices_withduplicates :" )
+    #print( "df_utils get_vertices-- df_vertices_withduplicates :" )
     df_vertices_withduplicates = df_dom.union( df_ip )
     # df_vertices_withduplicates.show()
 
-    print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
+    #print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
     df_vertices = df_vertices_withduplicates.dropDuplicates()
     # df_vertices.show()
 
@@ -89,7 +98,7 @@ def get_edges(df, a, b, c):
 
 def get_edges_domip(df):
     """
-    Creating a df_edges to use GraphFrames
+    Creating a df_edges to use GraphFrames in order to create a domain-ip graph.
     :param df: dataframe from our data. Idem format like in get_vertices function.
                 format:
                     root
@@ -104,10 +113,10 @@ def get_edges_domip(df):
     print( "df_utils get_edges_domip-- : df" )
     # df.show()
     df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
-    print( "df_utils get_edges_domip-- :df_edges_count" )
+    #print( "df_utils get_edges_domip-- :df_edges_count" )
     # df_edges_count.show()
     df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
-    print( "df_utils get_edges_domip-- :df_edges" )
+    #print( "df_utils get_edges_domip-- :df_edges" )
     # df_edges.show()
 
     return df_edges
@@ -115,7 +124,7 @@ def get_edges_domip(df):
 
 def get_edges_domdom(df):
     """
-    Creating a df_edges to use GraphFrames
+    Creating a df_edges to use GraphFrames in order to create a domain-domain graph.
     :param df: dataframe from our data. Idem format like in get_vertices function.
     :return: df_edges
     """
@@ -130,25 +139,26 @@ def get_edges_domdom(df):
                                         "edge_ratio" ) )  # .show()
                                         '''
     '''getting the complete graph with suspicious and normal nodes :'''
-    #df_edges_DD_exists = df.select( df.a, df.c,
-     #                               F.lit(1).alias(
-     #                                   "edge_ratio" ) )  # .show()
-    df_edges_DD_exists = df.select( df.a, df.c,df.edge_ratio)
+    # df_edges_DD_exists = df.select( df.a, df.c,
+    #                               F.lit(1).alias(
+    #                                   "edge_ratio" ) )  # .show()
+    df_edges_DD_exists = df.select( df.a, df.c, df.edge_ratio )
 
+    # df_edges_DD_exists.printSchema()
 
-    #df_edges_DD_exists.printSchema()
-
-    #print( "df_utils get_edges_domdom -- antes get_edges ..." )
+    # print( "df_utils get_edges_domdom -- antes get_edges ..." )
 
     df_edges = get_edges( df_edges_DD_exists, "a", "c", "edge_ratio" )
+
     print( "df_utils get_edges_domdom -- df_edges calculado ..." )
     df_edges.show()
 
     return df_edges
 
+
 def get_edges_domdom_malicious_ones(df):
     """
-    Creating a df_edges to use GraphFrames
+    Creating a df_edges to use GraphFrames only with the suspicious domains
     :param df: dataframe from our data. Idem format like in get_vertices function.
     :return: df_edges
     """
@@ -162,9 +172,10 @@ def get_edges_domdom_malicious_ones(df):
                                     F.when( df['edge_ratio'] > 0.5, 1 ).otherwise( 0 ).alias(
                                         "edge_ratio" ) )  # .show()
 
-    #print( "df_utils get_edges_domdom -- antes get_edges ..." )
+    # print( "df_utils get_edges_domdom -- antes get_edges ..." )
 
     df_edges = get_edges( df_edges_DD_exists, "a", "c", "edge_ratio" )
+
     print( "df_utils get_edges_domdom_malicious_ones -- df_edges calculado MALICIOUS..." )
     df_edges.show()
 

@@ -10,7 +10,7 @@ from pyspark.sql.functions import col
 
 
 
-def draw_nx(df_edges,path=None):  # usada en DI y DD, no funciona con muchos datos
+def draw_nx(df_edges,path=None):  # used in domain-ip  and dom-dom graphs, doesn't work with huge amount of data
     """
     Function to plot a bipartite graph with networkx
     :param df_edges: df_edges from a GraphFrame
@@ -27,32 +27,29 @@ def draw_nx(df_edges,path=None):  # usada en DI y DD, no funciona con muchos dat
     df = df_edges.toPandas()  ##GUARRADA
 
     B = nx.Graph()
-    print( "draw_utils draw_nx -- -- despues nx.Graph()" )
+    #print( "draw_utils draw_nx -- -- despues nx.Graph()" )
 
     B.add_nodes_from( df['src'], bipartite=1 )
-    print( "draw_utils draw_nx -- -- despues add_nodes_from src" )
+    #print( "draw_utils draw_nx -- -- despues add_nodes_from src" )
 
     B.add_nodes_from( df['dst'], bipartite=0 )
-    print( "draw_utils draw_nx -- -- despues add_nodes_from dst" )
+    #print( "draw_utils draw_nx -- -- despues add_nodes_from dst" )
     #B.add_weighted_edges_from(
     #    [(row['src'], row['dst'], 1) for idx, row in df.iterrows()],
     #    weight=row[] )
 
     B.add_edges_from( zip( df['src'], df['dst'] ), weight=1 )
 
-    print( "draw_utils draw_nx -- -- Nodes added to B" )
-
+    #print( "draw_utils draw_nx -- -- Nodes added to B" )
     # print( B.edges( data=True ) )
-    # [('test1', 'example.org', {'weight': 1}), ('test3', 'example.org', {'weight': 1}), ('test2', 'example.org', {'weight': 1}),
-    # ('website.com', 'else', {'weight': 1}), ('site.com', 'something', {'weight': 1})]
 
     pos = {node: [0, i] for i, node in enumerate( df['src'] )}
     pos.update( {node: [1, i] for i, node in enumerate( df['dst'] )} )
-    print( "draw_utils draw_nx -- -- despues de pos.update" )
+    #print( "draw_utils draw_nx -- -- despues de pos.update" )
     nx.draw( B, pos, with_labels=False )
     for p in pos:  # raise text positions
         pos[p][1] += 0.20
-    print( "draw_utils draw_nx -- -- despues for " )
+    #print( "draw_utils draw_nx -- -- despues for " )
     nx.draw_networkx_labels( B, pos )
 
     #Probando margenes
@@ -68,59 +65,18 @@ def draw_nx(df_edges,path=None):  # usada en DI y DD, no funciona con muchos dat
 
     if f"{path}" is not None:
         plt.savefig( f"{path}" )
-    print( "draw_utils draw_nx -- -- ante de plot" )
+    #print( "draw_utils draw_nx -- -- ante de plot" )
     plt.show()
 
-# TODO borrar la siguiente :
-'''
-def draw_igraph(g):  ##usada en DI y DD TODO : borrarla 
+
+def draw_igraph_domain_domain(g_domdom):
     """
     Version: 1.0
     Function to plot a dispersion of nodes (TupleList) in a graph with igraph
     :param g: GraphFrame
-    :return: ploted graph
+    :return: ig,visual_style : igraph and visual_style to draw the graph
     """
 
-    from igraph import Graph
-    from igraph import plot
-
-
-    print( "gf_utils draw_igraph --" )
-
-    ig2 = Graph.TupleList( g.edges.collect(), directed=True )
-    # ig2 = Graph.Erdos_Renyi(n=300, m=250)
-    visual_style = {}
-    N_vertices = ig2.vcount()
-
-    layout = ig2.layout( "kk" )
-    # layout = ig.layout("fr")
-    # layout = layout.fruchterman.reingold
-    colors = ["lightgray", "cyan", "magenta", "yellow", "blue", "green", "red"]
-    for component in ig2.components():
-        color = colors[min( 6, len( component ) - 1 )]
-        for vidx in component: ig2.vs[vidx]["color"] = color
-
-    visual_style["vertex_size"] = 20
-    visual_style["vertex_label"] = ig2.vs["name"]
-    visual_style["vertex_label_size"] = 14  # tamaño de la letra (hay q ver como se cambia el tipo de letra)
-    visual_style["vertex_label_dist"] = 1  # coloco etiqueta debajo del nodo
-    visual_style["vertex_label_angle"] = 1  # coloco etiqueta a la derecha: 0
-    # visual_style["edge_width"] = [7] * (N_vertices - 1)
-    # visual_style["edge_width"] = [1 + 2 * int(is_formal) for is_formal in ig.es["is_formal"]]
-    visual_style["layout"] = layout
-    visual_style["bbox"] = (20 * N_vertices, 20 * N_vertices)  # (600,600)
-    # visual_style["bbox"] = (300, 300)
-    visual_style["margin"] = 50
-    visual_style["main"] = "-- igraph plot :"
-    plot( ig2, **visual_style )
-'''
-def draw_igraph_domain_domain(g_domdom):  ##usada en DI y DD
-    """
-    Version: 1.0
-    Function to plot a dispersion of nodes (TupleList) in a graph with igraph
-    :param g: GraphFrame
-    :return: ploted graph
-    """
     #from igraph import Graph
 
     print( "draw_utils draw_igraph --" )
@@ -165,7 +121,7 @@ def draw_igraph_domain_ip(g):
        Version: 1.0
        Function to plot a dispersion of nodes (TupleList) in a graph with igraph
        :param g: GraphFrame
-       :return: ploted graph
+       :return: ig,visual_style : igraph and visual_style to draw the graph
     """
     # from igraph import Graph
 
@@ -196,18 +152,21 @@ def draw_igraph_domain_ip(g):
 
 def draw_log_hist(degree, bins=10,path=None):
     '''
-    degree : node degree
-    bins: division del histograma, dos formas
+    Function to draw a histogram in logaritmic scale.
+
+    :param degree : node degree
+    :param bins   : division of the histogram, dos methods
+    :param path   : path where to save the histogram image
+    :return : ploted bar histogram
 
     draw_log_hist(degree,10):
-    devuelve 10 barras con una division realizada por el np.histogram
+    returns 10 bars with division made by np.histogram
 
     draw_log_hist(degree,[1,10,100,200]):
+    returns plot between the numbers passed as a parameter,
+    it means that sums the number of elements between 1-10, 10-100,100-200 ....
 
-    devuelve plot entre los numeros que le pases,
-    es decir suma el numero de elementos que hay entre 1-10 , 10-100,100-200 ....
-
-    ESCALA LOGARITMICA
+    LOGARITHMIC SCALE
 
     '''
     print( "draw_utils draw_log_hist -- --" )
@@ -225,11 +184,12 @@ def draw_log_hist(degree, bins=10,path=None):
 def draw_minor_than_list(degree, list_tope,path=None):
     '''
 
-    degree : degree a pintar
-    list_tope: array de enteros con los topes
-    funcion que representa los elementos que hay menores que un tope,
-    cuantos hay menores que 400, menores que 300 , menores que 200 ....
-
+    Function to represent the elements that are minor than a maximum (tope),
+    how many are minor than 400, minor than 300, minor than 200 ....
+    :param degree   : degree a pintar
+    :param list_tope: array de enteros con los topes
+    :param path     : path where to save the histogram image
+    :return ploted bar histogram
     '''
     print( "draw_utils draw_minor_than_list -- --" )
 
@@ -245,8 +205,14 @@ def draw_minor_than_list(degree, list_tope,path=None):
 
 def draw_overlap_matrix(df_degree_ratio, list_top_suspicious,figsize=(10,10),path=None):
     '''
-    df_degree_ratio
-    top_suspicious : number of top suspicious domains to plot
+    Function to draw an overlap matrix of suspicious domains
+    :param df_degree_ratio : dataframe with all the data needed to represent the overlap matrix [a,c,count_ips_in_common,id,outDegree,edge_ratio]
+                             where a is src, c is dst, id is src, and outDegree is the outDegree of src. The edge_ratio is calculated with the
+                            algorithm proposed.
+    :param top_suspicious : number of top suspicious domains to plot
+    :param figsize
+    :param path : path where to save the histogram image
+    :return ploted overlap matrix
     '''
     import matplotlib.ticker as ticker
     matrix_src_dsc = df_degree_ratio.filter(
