@@ -1,7 +1,5 @@
 ````# TFM_fraud_36
 
-# Project Title
-
 Development of novel algorithms for fraud detection in
  online advertising
  
