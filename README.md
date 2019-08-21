@@ -36,7 +36,8 @@ Be carefull with the environment variables :
 |    variable           |    path                                                                                           | 
 | ----------------------|:-------------------------------------------------------------------------------------------------:| 
 | SPARK_HOME            | .../spark-2.4.1-bin-hadoop2.7/                                                                    | 
-| PYTHONPATH            |  .../spark-2.4.1-bin-hadoop2.7/python;.../spark-2.4.1-bin-hadoop2.7/python/lib/py4j-0.10.7-src.zip|  
+| PYTHONPATH            |  .../spark-2.4.1-bin-hadoop2.7/python;
+.../spark-2.4.1-bin-hadoop2.7/python/lib/py4j-0.10.7-src.zip|  
 | PYSPARK_PYTHON        | .../anaconda3/envs/fraud_36/bin/python                                                            | 
 | PYSPARK_DRIVER_PYTHON | .../anaconda3/envs/fraud_36/bin/python                                                            | 
 | PYSPARK_SUBMIT_ARGS   | --packages graphframes:graphframes:0.7.0-spark2.4-s_2.11  pyspark-shell                           | 
@@ -65,6 +66,6 @@ with some tests to different datasets and classes for the **'..._main'.py** prev
 Into the folder **fraud36/utils**, there are code distributed in classes to use in different data structures; for example : df_utils.py contains the functions that 
 apply to an spark dataframe; gf_utils.py contains functions that apply to a graphframes graph; draw_utils.py function to plot and draw ... 
 
-<img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/utils_fraud36.png" width="350" height="350">
+<img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/utils_fraud36.png" width="300" height="200">
 
 Also there is a zip : **'fraud36/source/utils.zip'** in order to make the use of this functions easy using a Jupyter Notebook. 
