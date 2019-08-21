@@ -17,21 +17,23 @@
 
 Download the full code. 
 
-The following instructions will let you execute the python classes described below locally for development and testing purposes. 
+The following instructions will let you execute the 3 main python classes described below locally for development and testing purposes. 
 
-### Prerequisites
+### Build with or Prerequisites
 
 This proyect was developed in Python using Pycharm Build#PC-183.5912.18
 
 Also this packages were installed: 
 
----
+```
+{
 conda          4.6.12 
 Python         3.6.8 
 graphframes    0.6                    
 pyspark        2.4.0                   
 python-igraph  0.7.1.post7   
----
+}
+```
 
 Be carefull with the environment variables :
 
