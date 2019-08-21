@@ -187,7 +187,7 @@ def draw_minor_than_list(degree, list_tope,path=None):
     Function to represent the elements that are minor than a maximum (tope),
     how many are minor than 400, minor than 300, minor than 200 ....
     :param degree   : degree a pintar
-    :param list_tope: array de enteros con los topes
+    :param list_tope: array of integers with the maximums
     :param path     : path where to save the histogram image
     :return ploted bar histogram
     '''
