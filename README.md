@@ -46,4 +46,4 @@ Also for generating the folder structure, was used pybuilder and tree.
 
 The proyect structre looks like the following image : 
 
-<img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/tree_fraud36.png" width="100" height="100">
+<img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/tree_fraud36.png" width="350" height="350">
