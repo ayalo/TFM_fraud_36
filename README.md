@@ -33,6 +33,14 @@ python-igraph  0.7.1.post7
 
 Be carefull with the environment variables :
 
+|    variable           |    path                                                                                           | 
+| ----------------------|:-------------------------------------------------------------------------------------------------:| 
+| SPARK_HOME            | .../spark-2.4.1-bin-hadoop2.7/                                                                    | 
+| PYTHONPATH            |  .../spark-2.4.1-bin-hadoop2.7/python;.../spark-2.4.1-bin-hadoop2.7/python/lib/py4j-0.10.7-src.zip|  
+| PYSPARK_PYTHON        | .../anaconda3/envs/fraud_36/bin/python                                                            | 
+| PYSPARK_DRIVER_PYTHON | .../anaconda3/envs/fraud_36/bin/python                                                            | 
+| PYSPARK_SUBMIT_ARGS   | --packages graphframes:graphframes:0.7.0-spark2.4-s_2.11  pyspark-shell                           | 
+
 SPARK_HOME  = .../spark-2.4.1-bin-hadoop2.7/
 PYTHONPATH  = .../spark-2.4.1-bin-hadoop2.7/python;.../spark-2.4.1-bin-hadoop2.7/python/lib/py4j-0.10.7-src.zip
 PYSPARK_PYTHON = .../anaconda3/envs/fraud_36/bin/python
@@ -48,13 +56,15 @@ The proyect structre looks like the following image :
 
 <img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/tree_fraud36.png" width="350" height="350">
 
-Three main clases into the folder source, allow us to execute the code to obtain, different graphs and plots. 
+Three main clases into the **fraud36/source/** folder, allow us to execute the code to obtain, different graphs and plots. 
 
-Into the folder notebooks, there are 3 Jupyter notebooks with some tests to different datasets and classes for the 'main'.py previously cited.
+Into the folder **fraud36/notebooks**, there are 3 Jupyter Notebooks 
 
-Into the folder utils, there are code distributed in classes to use in different data structures; for example : df_utils.py contains the functions that 
+with some tests to different datasets and classes for the **'..._main'.py** previously cited.
+
+Into the folder **fraud36/utils**, there are code distributed in classes to use in different data structures; for example : df_utils.py contains the functions that 
 apply to an spark dataframe; gf_utils.py contains functions that apply to a graphframes graph; draw_utils.py function to plot and draw ... 
 
 <img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/utils_fraud36.png" width="350" height="350">
 
-Also there is a zip : 'utils.zip' in order to make the use of this functions easy using a Jupyter notebook. 
+Also there is a zip : **'fraud36/source/utils.zip'** in order to make the use of this functions easy using a Jupyter Notebook. 
