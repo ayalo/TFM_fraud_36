@@ -59,8 +59,8 @@ Into the folder **fraud36/notebooks**, there are 3 Jupyter Notebooks
 
 with some tests to different datasets and classes for the **'..._main'.py** previously cited.
 
-Into the folder **fraud36/utils**, there are code distributed in classes to use in different data structures; for example : df_utils.py contains the functions that 
-apply to an spark dataframe; gf_utils.py contains functions that apply to a graphframes graph; draw_utils.py function to plot and draw ... 
+Into the folder **fraud36/utils**, there are code distributed in classes to use in different data structures; for example : **df_utils.py** contains the functions that 
+apply to an spark dataframe; **gf_utils.py** contains functions that apply to a graphframes graph; **draw_utils.py** function to plot and draw ... 
 
 <img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/utils_fraud36.png" width="200" height="100">
 
