@@ -4,7 +4,7 @@
 ## Development of novel algorithms for fraud detection in online advertising
  
  This proyect is a proof of concept for detecting malicious webs in large datasets 
- based on the paper :** "Using Co-Visitation Networks For Detecting Large Scale Online Display Advertising Exchange Fraud"**
+ based on the paper : **"Using Co-Visitation Networks For Detecting Large Scale Online Display Advertising Exchange Fraud"**
  
  The goal of the project is to implement new algorithms proposed in the literature, 
  including entropy-based methods,co-visitation patterns, etc.  and test the algorithms 
@@ -21,18 +21,16 @@ The following instructions will let you execute the 3 main python classes descri
 
 ### Build with or Prerequisites
 
-This proyect was developed in Python using Pycharm Build#PC-183.5912.18
+This proyect was developed in Python using  ```Pycharm Build#PC-183.5912.18```
 
 Also this packages were installed: 
 
 ```
-{
 conda          4.6.12 
 Python         3.6.8 
 graphframes    0.6                    
 pyspark        2.4.0                   
 python-igraph  0.7.1.post7   
-}
 ```
 
 Be carefull with the environment variables :
