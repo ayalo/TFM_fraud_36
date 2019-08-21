@@ -45,6 +45,7 @@ Also for generating the folder structure, was used pybuilder and tree.
 ### Installing
 
 The proyect structre looks like the following image : 
-![alt text](https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/tree_fraud36.png){:height="50%" width="50%"}
+![alt text](https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/tree_fraud36.png)
 
 
+<img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/tree_fraud36.png" width="50" height="50">
