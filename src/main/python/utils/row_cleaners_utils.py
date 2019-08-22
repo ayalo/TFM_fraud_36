@@ -23,7 +23,7 @@ def domain_cleaner(domain):
         return domain
 
     domain = domain.lower()
-    dirty_string = re.sub( "www.|.www|https:\/\/|http:\/\/|\"|\'", "", domain )  ##.lower()
+    dirty_string = re.sub( "www.|.www|https:\/\/|http:\/\/|\"|\'|\}", "", domain )  ##.lower()
     if domain.isdigit():
         return domain
 

@@ -31,6 +31,9 @@ class TestDomainCleaner(unittest.TestCase):
         self.assertEqual(res,'helloflash.com')
         res = domain_cleaner("http://hello.domain.com")
         self.assertEqual(res,'domain.com')
+        res = domain_cleaner("health.drinkwater.reminder}")
+        self.assertEqual(res,'health.drinkwater.reminder')
+
 
 
 
