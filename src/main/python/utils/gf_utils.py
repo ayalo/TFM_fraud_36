@@ -131,7 +131,7 @@ def get_graph_domdom(g_domip):
     gf_malicious_nodes = GraphFrame( df_vertices, df_edges )
     """
 
-    return gf_total_nodes #, gf_malicious_nodes
+    return gf_total_nodes , gf_malicious_nodes
 
 
 def gf_top_most_visited(gf, top=None):
