@@ -68,9 +68,9 @@ Also there is a zip : **'fraud36/source/utils.zip'** in order to make the use of
 
 
 
-##Functions described :
+## Functions described :
 
-###df_utils.py :
+### df_utils.py :
 
 def **is_string(s)**:
 ```
@@ -142,7 +142,7 @@ def **get_edges_domdom_malicious_ones(df)**:
 
 
 
-###draw_utils.py :
+### draw_utils.py :
 
 def **draw_nx(df_edges,path=None)**:  # used in domain-ip  and dom-dom graphs, doesn't work with huge amount of data
 ```
@@ -215,7 +215,7 @@ def **draw_overlap_matrix(df_degree_ratio, list_top_suspicious,figsize=(10,10),p
 
 
 
-###gf_utils.py :
+### gf_utils.py :
 
 def **gf_filter_dom_ip_edges(g, min_edge)**:  # filtar count>15 visitas  en el grafo. # Usada en DI y DD
 ```
@@ -294,7 +294,7 @@ def **gf_filter_edge(gf, src)**:
 ```
 
 
-###read_write_utils.py :
+### read_write_utils.py :
 
 def **gf_write_parquet(gf, path)**:
 ```
@@ -360,7 +360,7 @@ def **df_read_csv(spark_session, path)**:
     :return: dataframe
 ```
 
-###row_cleaners_utils.py :
+### row_cleaners_utils.py :
 
 def **domain_cleaner(domain)**:
 ```
@@ -397,7 +397,7 @@ def **valid_ip(ip)**:
     :return: Boolean
 ```
 
-###spark_utils.py :
+### spark_utils.py :
 ```
 def **spark_session()**:
     return SparkSession.builder.getOrCreate()
