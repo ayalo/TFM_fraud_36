@@ -57,7 +57,6 @@ def get_motifs(g_domip):
     """
     # Query  DomainIpGraph to obtain the visited IPs intersection for 2 diferent domains
     print( "gf_utils get_motifs -- df_motifs dropDuplicates( ['e', 'e2'] " )
-    df_motifs = g_domip.find( "(a)-[e]->(b); (c)-[e2]->(b)" ).filter( "a != c" ).dropDuplicates( ['e', 'e2'] )
     # df_motifs.show()
 
     return df_motifs
@@ -123,14 +122,16 @@ def get_graph_domdom(g_domip):
 
     gf_total_nodes = GraphFrame( df_vertices, df_edges )
 
+    """
     df_edges = get_edges_domdom_malicious_ones( df_degree_ratio )
     df_vertices = get_vertices( df_edges, "src", "dst" )
     #print( "DomainDomainGraph get_graph_domdom --  df_edges gf_malicious_nodes OLAYAs : " )
     #df_edges.show()
 
     gf_malicious_nodes = GraphFrame( df_vertices, df_edges )
+    """
 
-    return gf_total_nodes, gf_malicious_nodes
+    return gf_total_nodes #, gf_malicious_nodes
 
 
 def gf_top_most_visited(gf, top=None):
@@ -156,7 +157,7 @@ def gf_top_most_visited(gf, top=None):
 
 # TODO def doms_or_ip_more_visited(gf_dom_ip):
 
-def gf_filter_Edge(gf, src):
+def gf_filter_edge(gf, src):
     """
     Function to get the subgraph of Graphframes graph related of a src (domain) gived as a function parameter
     :param gf:

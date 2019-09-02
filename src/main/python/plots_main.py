@@ -125,11 +125,11 @@ def main():
 
 
     # Prueba de subgrafo
-    #print( "plots_main MAIN-- Calculando subrafo para un domino especifico --  gf_filter_Edge  en gf_domip..." )
+    #print( "plots_main MAIN-- Calculando subrafo para un domino especifico --  gf_filter_edge  en gf_domip..." )
     #sub_gf_domip=(gf_domip,"yoorewards")
     #draw_nx( sub_gf_domip,"/Users/olaya/Documents/Master/TFM/output_fraud/sub_gf_domip_nx.png")
 
-    #print( "plots_main MAIN-- Calculando subrafo para un domino especifico --  gf_filter_Edge  en gf_domdom..." )
+    #print( "plots_main MAIN-- Calculando subrafo para un domino especifico --  gf_filter_edge  en gf_domdom..." )
     #sub_gf_domdom=(gf_domdom,"thegamer.com")
     #sub_gf_domdom.show()
     #ig, visual_style = draw_igraph_domain_domain( sub_gf_domdom )
