@@ -65,3 +65,341 @@ apply to an spark dataframe; **gf_utils.py** contains functions that apply to a 
 <img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/utils_fraud36.png" width="200" height="100">
 
 Also there is a zip : **'fraud36/source/utils.zip'** in order to make the use of this functions easy using a Jupyter Notebook. 
+
+
+
+##Functions described :
+
+###df_utils.py :
+
+def **is_string(s)**:
+```
+    Function that returns true if s is a string or false if not
+    The intention of this function is filter all the types into the df that have no normalized type in 'referrer_domain'
+    or 'user_ip' columns, in order to clean the original dataset.
+    :param s: string passed as an argument
+    :return: boolean True/False
+```
+def **clean(df, referrer_domain, user_ip)**:  
+```
+    Function to clean the original data from df, eliminate or filter null, none, and other types that are not string in
+    'referrer_domain' or 'user_ip' columns, in order to clean the original dataset.
+    :param df:
+    :param referrer_domain: first column to clean
+    :param user_ip: second column to clean
+    :return: df_cleaned_format
+```
+
+def **get_vertices(df_edges, a, b)**:
+```
+    Function to Rename the columns of  df_vertices in order to use GraphFrames [id].
+    This function renames the columns a and b with the alias id, and returns the dataframe df_vertices,
+    with a single column and with dropedDuplicates.
+    :param df_edges: dataframe of edges with format for a GraphFrames use (src,dst,edge_weight)
+    :param a: df column
+    :param b: df column
+    :return:
+```
+
+def **get_edges(df, a, b, c)**:
+```
+    Function to Rename the columns of df_edges in the correct format to GraphFrames [src, dst, edge_weight]
+    :param df: df_edges with the incorrect name columns
+    :param a: old name for column src
+    :param b: old name for column dst
+    :param c: old name for column edge_weight
+    :return: df_edges
+```
+
+def **get_edges_domip(df)**:
+```
+    Creating a df_edges to use GraphFrames in order to create a domain-ip graph.
+    :param df: dataframe from our data. Idem format like in get_vertices function.
+                format:
+                    root
+                        |-- user_ip: string (nullable = true)
+                        |-- uuid_hashed: string (nullable = true)
+                        |-- useragent: string (nullable = true)
+                        |-- referrer_domain: string (nullable = true)
+                        |-- ssp_domain: string (nullable = true)
+                        |-- date_time: string (nullable = true)
+    :return: df_edges
+```
+
+def **get_edges_domdom(df)**:
+```
+    Creating a df_edges to use GraphFrames in order to create a domain-domain graph.
+    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :return: df_edges
+```
+
+def **get_edges_domdom_malicious_ones(df)**:
+```
+    Creating a df_edges to use GraphFrames only with the suspicious domains
+    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :return: df_edges
+```
+
+
+
+###draw_utils.py :
+
+def **draw_nx(df_edges,path=None)**:  # used in domain-ip  and dom-dom graphs, doesn't work with huge amount of data
+```
+    Function to plot a bipartite graph with networkx
+    :param df_edges: df_edges from a GraphFrame
+    :param path=None
+    :return: ploted graph
+
+```
+def **draw_igraph_domain_domain(g_domdom)**:
+```
+    Version: 1.0
+    Function to plot a dispersion of nodes (TupleList) in a graph with igraph
+    :param g: GraphFrame
+    :return: ig,visual_style : igraph and visual_style to draw the graph
+```
+
+def **draw_igraph_domain_ip(g)**:
+    #TODO es repetida de la anterior, intentar mejorarla o borrarla
+```
+       Version: 1.0
+       Function to plot a dispersion of nodes (TupleList) in a graph with igraph
+       :param g: GraphFrame
+       :return: ig,visual_style : igraph and visual_style to draw the graph
+```
+
+def **draw_log_hist(degree, bins=10,path=None)**:
+```
+    Function to draw a histogram in logaritmic scale.
+
+    :param degree : node degree
+    :param bins   : division of the histogram, dos methods
+    :param path   : path where to save the histogram image
+    :return : ploted bar histogram
+
+    draw_log_hist(degree,10):
+    returns 10 bars with division made by np.histogram
+
+    draw_log_hist(degree,[1,10,100,200]):
+    returns plot between the numbers passed as a parameter,
+    it means that sums the number of elements between 1-10, 10-100,100-200 ....
+
+    LOGARITHMIC SCALE
+
+```
+
+def **draw_minor_than_list(degree, list_tope,path=None)**:
+```
+
+    Function to represent the elements that are minor than a maximum (tope),
+    how many are minor than 400, minor than 300, minor than 200 ....
+    :param degree   : degree a pintar
+    :param list_tope: array of integers with the maximums
+    :param path     : path where to save the histogram image
+    :return ploted bar histogram
+```
+
+def **draw_overlap_matrix(df_degree_ratio, list_top_suspicious,figsize=(10,10),path=None)**:
+```
+    Function to draw an overlap matrix of suspicious domains
+    :param df_degree_ratio : dataframe with all the data needed to represent the overlap matrix [a,c,count_ips_in_common,id,outDegree,edge_ratio]
+                             where a is src, c is dst, id is src, and outDegree is the outDegree of src. The edge_ratio is calculated with the
+                            algorithm proposed.
+    :param top_suspicious : number of top suspicious domains to plot
+    :param figsize
+    :param path : path where to save the histogram image
+    :return ploted overlap matrix
+```
+
+
+
+
+###gf_utils.py :
+
+def **gf_filter_dom_ip_edges(g, min_edge)**:  # filtar count>15 visitas  en el grafo. # Usada en DI y DD
+```
+    Function to select only the nodes in the graph with more than a given weight passed as parameter, in order
+    to filter non relevant data to construct an smaller graph .
+    :param g: original gf_dom_ip GraphFrame
+    :param min_edge: value to dismiss all the nodes on g below the limit_edge value . limit_edge value indicate the
+            number of visits domain-ip (if for a src - dst tuple : edge_weight <  limit_edge this row is discarded)
+    :return gf_filtered: GraphFrame generated with
+```
+
+def **get_graph_domip(df, min_edge)**:
+```
+    Get GraphFrame to draw a bipartite graph
+    :param df dataframe from our data. Idem format like in get_vertices function.
+    :param min_edge: value to dismiss all the nodes on g below the min_edge value
+                        (if for a src - dst tuple : edge_weight <  min_edge this row is discarded)
+    :return: gf_filtered (GraphFrame graph) filtered by min_edge
+
+    :definition df_vertices: vertices for the graphframe : domains and ips
+    :definition df_edges: links between them
+```
+
+def **get_motifs(g_domip)**:
+```
+    Query graph to get motifs df of ip_cleaned IPs visited by 2 different domain_cleaned domains
+
+        Motifs finding is also known as graph pattern matching.
+        The pattern matching consists on checking a value against some pattern.
+        The pattern is an expression used to define some connected vertices.
+
+    :param g_domip:  graphframe
+    :return: df_motifs
+```
+
+def **get_motifs_count(df_motifs)**:
+```
+    Get the count of ip_cleaned IPs visisted by 2 different domain_cleaned domains
+
+    :param df_motifs:
+    :return: df_motifs_count
+```
+
+def **get_df_degree_ratio(g_domip)**:
+```
+    Function to get the df_degree_ratio, with the format described below.
+    :param g_domip:
+    :return df_degree_ratio : dataframe with all the data needed to represent the overlap matrix
+    [a,c,count_ips_in_common,id,outDegree,edge_ratio]
+    where a is src, c is dst, id is src, and outDegree is the outDegree of src.
+    The edge_ratio is calculated with the algorithm proposed.
+```
+
+def **get_graph_domdom(g_domip)**:
+```
+    Get GraphFrame to draw graph
+    :param g_domip: graph from domain_ip_graph .
+    :return: gf (GraphFrame graph) domain-domain
+    :definition df_vertices: vertices for the graphframe : domains
+    :definition df_edges: links between them
+```
+
+def **gf_top_most_visited(gf, top=None)**:
+```
+    Using the graphframe function 'degrees', calculate the most visited vertices.
+    :param gf:  grapframe
+    :return: sorted_degrees
+```
+
+def **gf_filter_edge(gf, src)**:
+```
+    Function to get the subgraph of Graphframes graph related of a src (domain) gived as a function parameter
+    :param gf:
+    :param src:
+    :return: subgraph for the src
+```
+
+
+###read_write_utils.py :
+
+def **gf_write_parquet(gf, path)**:
+```
+    Function to save (write to disk) a graphframe gf using write.parquet
+    :param gf: graph graphframe
+    :param path: path where to save the graph
+    :return:  - saved graph into the path given
+```
+
+def **gf_read_parquet(spark_session, path)**:
+```
+    Function to read a graph graphframes saved into disk, using read.parquet
+    :param spark_session:
+    :param path: where to read the graph saved
+    :return: graphframe graph
+```
+
+def **df_write_parquet(df, path)**:
+```
+    Function to save (write to disk) a dataframe df using write.parquet
+    :param df: dataframe
+    :param path: path where to save the dataframe
+    :return:  - saved dataframe into the path given
+```
+
+def **df_read_parquet(spark_session, path)**:
+```
+    Function to read a df dataframe saved into disk, using read.parquet
+    :param spark_session:
+    :param path: where to read the df saved
+    :return: dataframe
+```
+
+def **gf_write_csv(gf, path)**:
+```
+    Function to save (write to disk) a graphframe gf using write.csv
+    :param gf: graph graphframe
+    :param path: path where to save the graph
+    :return:  - saved graph into the path given
+```
+
+def **gf_read_csv(spark_session, path)**:
+```
+    Function to read a graph graphframes saved into disk, using read.csv
+    :param spark_session:
+    :param path: where to read the graph saved
+    :return: graphframe graph
+```
+
+def **df_write_csv(df, path)**:
+```
+    Function to save (write to disk) a dataframe df using write.csv
+    :param df: dataframe
+    :param path: path where to save the dataframe
+    :return:  - saved dataframe into the path given
+```
+
+def **df_read_csv(spark_session, path)**:
+```
+    Function to read a df dataframe saved into disk, using read.csv
+    :param spark_session:
+    :param path: where to read the df saved
+    :return: dataframe
+```
+
+###row_cleaners_utils.py :
+
+def **domain_cleaner(domain)**:
+```
+    Function to clean a domain passed as a parameter string.
+
+    We left only lower case, clean certain characters and only printable ones
+    We get only the main domain, or the first part til the first / begging from the left
+    We substract '.com' from the begging and 'https://' 'http://' 'www.'
+    :param domain : String
+    :return: cleaned_domain
+```
+    
+def **delete_ini(text, subString)**:
+```
+    Function to recursively delete the first part of an string, for example
+    if the text or domain starts like : com.com.com.google.es, we only left google.es
+
+    :param text:
+    :param subString:
+    :return:
+```
+
+def **ip_cleaner(ip)**:
+```
+    To verify that the IP has this format  : X.X.X.X
+    :arg ip : String
+    :return: cleaned_ip / "Format not valid"
+```
+
+def **valid_ip(ip)**:
+```
+    To verify that the IP has this format  : X.X.X.X
+    :param ip:
+    :return: Boolean
+```
+
+###spark_utils.py :
+```
+def **spark_session()**:
+    return SparkSession.builder.getOrCreate()
+```
+
