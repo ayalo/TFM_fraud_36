@@ -66,6 +66,9 @@ apply to an spark dataframe; **gf_utils.py** contains functions that apply to a 
 
 Also there is a zip : **'fraud36/source/utils.zip'** in order to make the use of this functions easy using a Jupyter Notebook. 
 
+<img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/algorithm_code_schema.jpg" width="350" height="350">
+
+<img src="https://github.com/ayalo/TFM_fraud_36/blob/master/docs/images/functons_code.jpg" width="350" height="350">
 
 
 ## Functions described :
