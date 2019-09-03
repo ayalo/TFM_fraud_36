@@ -100,11 +100,13 @@ def main():
     draw_log_hist( degree, [1, 10, 50, 100, 200, 300, 400],"/Users/olaya/Documents/Master/TFM/output_fraud/log_hist_plot.png" )
 
 
+
     print( "plots_main MAIN-- Calculando segundo histograma --  draw_minor_than_list -- ..." )
 
 
     list_tope = [400, 300, 200, 100, 50, 10]
     draw_minor_than_list( degree, list_tope,"/Users/olaya/Documents/Master/TFM/output_fraud/minor_than_list_plot.png" )
+
 
 
 
@@ -122,6 +124,7 @@ def main():
     # cojo un 20% de datos totales (dominios unicos) de la muestra de manera aleatoria
     list_sample = [row["id"] for row in sample_50_percent]
     draw_overlap_matrix( df_degree_ratio, list_sample,"/Users/olaya/Documents/Master/TFM/output_fraud/overlap_list_sample.pdf" )
+
 
 
     # Prueba de subgrafo
