@@ -142,14 +142,14 @@ def **get_edges_domip(df)**:
 def **get_edges_domdom(df)**:
 ```
     Creating a df_edges to use GraphFrames in order to create a domain-domain graph.
-    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :param df: dataframe from our data df_degree_ratio. Idem format like in get_vertices function.
     :return: df_edges
 ```
 
 def **get_edges_domdom_malicious_ones(df)**:
 ```
     Creating a df_edges to use GraphFrames only with the suspicious domains
-    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :param df: dataframe from our data df_degree_ratio. Idem format like in get_vertices function.
     :return: df_edges
 ```
 
@@ -233,7 +233,7 @@ def **draw_overlap_matrix(df_degree_ratio, list_top_suspicious,figsize=(10,10),p
 def **gf_filter_dom_ip_edges(g, min_edge)**:  # filtar count>15 visitas  en el grafo. # Usada en DI y DD
 ```
     Function to select only the nodes in the graph with more than a given weight passed as parameter, in order
-    to filter non relevant data to construct an smaller graph .
+    to filter non relevant data to construct an smaller graph s
     :param g: original gf_dom_ip GraphFrame
     :param min_edge: value to dismiss all the nodes on g below the limit_edge value . limit_edge value indicate the
             number of visits domain-ip (if for a src - dst tuple : edge_weight <  limit_edge this row is discarded)
