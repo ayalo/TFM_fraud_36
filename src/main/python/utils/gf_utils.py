@@ -57,6 +57,7 @@ def get_motifs(g_domip):
     """
     # Query  DomainIpGraph to obtain the visited IPs intersection for 2 diferent domains
     print( "gf_utils get_motifs -- df_motifs dropDuplicates( ['e', 'e2'] " )
+    df_motifs = g_domip.find( "(a)-[e]->(b); (c)-[e2]->(b)" ).filter( "a != c" ).dropDuplicates( ['e', 'e2'] )
     # df_motifs.show()
 
     return df_motifs
@@ -95,7 +96,7 @@ def get_df_degree_ratio(g_domip):
 
     df_degree_ratio = df_degree.withColumn( 'edge_ratio',
                                             df_degree.count_ips_in_common / (df_degree.outDegree + '0.000000001') )
-    #print( "gf_utils get_df_degree_ratio --  df_degreeRatio division  (edge_ratio = covisitation degree: " )
+    # print( "gf_utils get_df_degree_ratio --  df_degreeRatio division  (edge_ratio = covisitation degree: " )
     # df_degree_ratio.show( 10, False )
 
     return df_degree_ratio
@@ -111,25 +112,24 @@ def get_graph_domdom(g_domip):
     """
 
     ## meter excepcion cuando no hay ningun dominio - dominio relacionado para q no calcule todo
-    print( "DomainDomainGraph get_graph_domdom -- g_domip.edges.show() " )
+    print( "gf_utils get_graph_domdom -- to calculate total graph) " )
     df_degree_ratio = get_df_degree_ratio( g_domip )
-    # df_degree_ratio.show(10,False)
+    df_degree_ratio.show(10,False)
 
     df_edges = get_edges_domdom( df_degree_ratio )
     df_vertices = get_vertices( df_edges, "src", "dst" )
-    #print( "DomainDomainGraph get_graph_domdom --  df_edges  gf_total_nodes OLAYAs : " )
-    #df_edges.show()
+    # print( "gf_utils get_graph_domdom --  df_edges  gf_total_nodes OLAYAs : " )
+    # df_edges.show()
 
     gf_total_nodes = GraphFrame( df_vertices, df_edges )
 
-    """
-    df_edges = get_edges_domdom_malicious_ones( df_degree_ratio )
+    print( "gf_utils get_graph_domdom -- to calculate malicious graph " )
+    df_edges = get_edges_domdom_malicious_ones( df_degree_ratio) #, 5 )
     df_vertices = get_vertices( df_edges, "src", "dst" )
-    #print( "DomainDomainGraph get_graph_domdom --  df_edges gf_malicious_nodes OLAYAs : " )
-    #df_edges.show()
+    # print( "gf_utils get_graph_domdom --  df_edges gf_malicious_nodes OLAYAs : " )
+    # df_edges.show()
 
     gf_malicious_nodes = GraphFrame( df_vertices, df_edges )
-    """
 
     return gf_total_nodes , gf_malicious_nodes
 
@@ -155,7 +155,7 @@ def gf_top_most_visited(gf, top=None):
     return sorted_degrees.limit( top )
 
 
-# TODO def doms_or_ip_more_visited(gf_dom_ip):
+# TODO deff doms_or_ip_more_visited(gf_dom_ip):
 
 def gf_filter_edge(gf, src):
     """

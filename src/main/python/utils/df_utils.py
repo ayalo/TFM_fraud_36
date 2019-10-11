@@ -40,7 +40,7 @@ def clean(df, referrer_domain, user_ip):  # usada en DI (con el df original) y D
 
     # Adding new column to df with the normalized/filtered/cleaned user_ip : ip_cleaned
     udf_ipcleaner = udf( ip_cleaner, StringType() )
-    #print( "df-utils clean-- Calculando df_cleaned_ip" )
+    # print( "df-utils clean-- Calculando df_cleaned_ip" )
     df_cleaned_ip = df.withColumn( 'ip_cleaned', udf_ipcleaner( df.user_ip ) )
 
     # Adding new column to df with the normalized/filtered/cleaned referrer_domain : domain_cleaned
@@ -68,11 +68,11 @@ def get_vertices(df_edges, a, b):
     df_dom = df_edges.select( col( f"{a}" ).alias( "id" ) )
     df_ip = df_edges.select( col( f"{b}" ).alias( "id" ) )
 
-    #print( "df_utils get_vertices-- df_vertices_withduplicates :" )
+    # print( "df_utils get_vertices-- df_vertices_withduplicates :" )
     df_vertices_withduplicates = df_dom.union( df_ip )
     # df_vertices_withduplicates.show()
 
-    #print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
+    # print( "df_utils get_vertices-- df_vertices_sin duplicates :" )
     df_vertices = df_vertices_withduplicates.dropDuplicates()
     # df_vertices.show()
 
@@ -113,10 +113,10 @@ def get_edges_domip(df):
     print( "df_utils get_edges_domip-- : df" )
     # df.show()
     df_edges_count = df.groupBy( "domain_cleaned", "ip_cleaned" ).count()
-    #print( "df_utils get_edges_domip-- :df_edges_count" )
+    # print( "df_utils get_edges_domip-- :df_edges_count" )
     # df_edges_count.show()
     df_edges = get_edges( df_edges_count, "domain_cleaned", "ip_cleaned", "count" )
-    #print( "df_utils get_edges_domip-- :df_edges" )
+    # print( "df_utils get_edges_domip-- :df_edges" )
     # df_edges.show()
 
     return df_edges
@@ -125,7 +125,7 @@ def get_edges_domip(df):
 def get_edges_domdom(df):
     """
     Creating a df_edges to use GraphFrames in order to create a domain-domain graph.
-    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :param df: dataframe from our data. Idem format like in get_vertices function. df_degree_ratio
     :return: df_edges
     """
     print( "df_utils get_edges_domdom -- df que llega ..." )
@@ -156,21 +156,41 @@ def get_edges_domdom(df):
     return df_edges
 
 
-def get_edges_domdom_malicious_ones(df):
+def get_edges_domdom_malicious_ones(df, neighbor=None):
     """
     Creating a df_edges to use GraphFrames only with the suspicious domains
-    :param df: dataframe from our data. Idem format like in get_vertices function.
+    :param df: dataframe from our data. Idem format like in get_vertices function. df_degree_ratio
+    :param neighbor : minimum number of neighbors of the node.
     :return: df_edges
     """
+    if f"{neighbor}" is None:
+        neighbor == f"{neighbor}"
+    else:
+        neighbor = 5
+
     print( "df_utils get_edges_domdom -- df que llega ..." )
-    # df.show()
-    # df.printSchema()
+    df.show( 5, False )
+    df.printSchema()
 
     # this is only for fitler all suspicius domains
+    print( f"NEIGHBOR: {neighbor}" )
+    df_filtered_neighbor = df.filter( F.col( 'outDegree' ) > f"{neighbor}" )
+    print( "df_utils get_edges_domdom_malicious_ones --df_filtered_neighbor.show()" )
+    df_filtered_neighbor.show( 20, False )
+    df_filtered_ratio = df_filtered_neighbor.filter( F.col( 'edge_ratio' ) > 0.5 )
+    print( "df_utils df_otro -- df que llega ..." )
+    df_filtered_ratio.show( 20, False )
 
-    df_edges_DD_exists = df.select( df.a, df.c,
-                                    F.when( df['edge_ratio'] > 0.5, 1 ).otherwise( 0 ).alias(
-                                        "edge_ratio" ) )  # .show()
+    # df_edges_DD_exists = df_filtered_neighbours.select( df.a, df.c,
+    #                                                    F.when( df_filtered_neighbors['edge_ratio'] > 0.5,
+    #                                                            1 ).otherwise( 0 ).alias(
+    #                                                        "edge_ratio" ) )  # .show()
+
+    ##df_filtered_neighbor = df.select( df.a, df.c, F.when( df['edge_ratio'] > 0.5, df['edge_ratio'] ).alias(
+    ##                                                        "edge_ratio" ), F.when(df['count_ips_in_common'] > 5, df['count_ips_in_common'] ).alias(
+    ##                                                        "count_ips_in_common" ))
+
+    df_edges_DD_exists = df_filtered_ratio.select( df.a, df.c, df.edge_ratio )
 
     # print( "df_utils get_edges_domdom -- antes get_edges ..." )
 

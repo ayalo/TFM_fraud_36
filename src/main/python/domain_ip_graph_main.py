@@ -58,7 +58,7 @@ def main():
     Code to read a dataframe from one file saved on disk
     '''
     df = spark.read.format( "csv" ).option( "header", 'true' ).option( "delimiter", ',' ).load(
-        "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_000000000492.csv.gz" )
+        "/Users/olaya/Documents/Master/TFM/Datos/180208/ssp_bid_compressed_00000000049[0-3].csv.gz" )
 
     print( "DomainIpGraph MAIN-- Print complete Dataframe ..." )
     df.show()
@@ -66,32 +66,32 @@ def main():
     # Always first clean an normalize de data
     print( "DomainIpGraph MAIN--  cleanning dataframe ..." )
     df_cleaned = clean( df,"referrer_domain","user_ip" )
-    #print( "DomainIpGraph MAIN--cleaned df ..." )
-    # df.show()
+    print( "DomainIpGraph MAIN--cleaned df ..." )
+    df.show(15,False)
 
     # Generating the graphframe domain-ip
     print( "DomainIpGraph MAIN--get graph DI ... with a filter where the nodes with less than 80 visits: " )
     gf_domip = get_graph_domip( df_cleaned, 80 )
 
+    # print( "main -- Draw using nx.Graph -- only the nodes with more than 80 visits:" )
+    df_domip_to_print = gf_domip.edges.filter( gf_domip.edges.edge_weight > 80 )
+    gf_domip_to_print = gf_filter_dom_ip_edges( gf_domip, 80 )
+
     # code to obtain the igraph to plot from the Graphframe gf_domip
-    #print( "DomainIpGraph MAIN-- Draw using igraph ..." )
-    #ig, visual_style = draw_igraph_domain_ip( gf_domip )
-    #plot( ig, **visual_style )
+    print( "DomainIpGraph MAIN-- Draw using igraph ..." )
+    ig, visual_style = draw_igraph_domain_ip( gf_domip )
+    plot( ig, **visual_style )
 
     # Code to plot and save the graph into disk
-    #plot( ig, **visual_style ).save(
-    #   "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip.png" )
+    plot( gf_domip, **visual_style ).save(
+     "/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip.png" )
 
     # code to plot the graph
     print( "main -- Draw using nx.Graph -- all graph:" )
     draw_nx( gf_domip.edges )
 
-    #print( "main -- Draw using nx.Graph -- only the nodes with more than 80 visits:" )
-    #df_domip_to_print = gf_domip.edges.filter( gf_domip.edges.edge_weight > 80 )
-    #gf_domip_to_print = gf_filter_dom_ip_edges (gf_domip,80)
-
     # Code to plot and save the graph into disk
-    #draw_nx( gf_domip.edges,"/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip_nx.png")
+    draw_nx( gf_domip.edges,"/Users/olaya/Documents/Master/TFM/output_fraud/gf_domip_nx.png")
 
     return gf_domip
 

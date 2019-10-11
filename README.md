@@ -46,6 +46,14 @@ Be carefull with the environment variables :
 
 Also for generating the folder structure, was used pybuilder and tree. 
 
+### Running the notebooks 
+In order to run the Jupiter notebook locally : 
+```
+PYSPARK_DRIVER_PYTHON=jupyter 
+PYSPARK_DRIVER_PYTHON_OPTS='notebook --ip="localhost" --port=8888' 
+.../spark-2.4.1-bin-hadoop2.7/bin/pyspark  --jars .../spark-2.4.1-bin-hadoop2.7/jars/graphframes-assembly-0.7.1-SNAPSHOT-spark2.4.jar
+```
+
 
 ### Code Organization 
 

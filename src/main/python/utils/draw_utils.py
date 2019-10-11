@@ -87,11 +87,11 @@ def draw_igraph_domain_domain(g_domdom):
     visual_style = {}
     N_vertices = ig.vcount()
 
-    #print( ig.es["weight"] )
-    #print( f" is weighted {ig.is_weighted()} " )
-    # layout = ig.layout( "kk" )
-    # layout= layout_kamada_kawai(weights=[r["edge_weight"] for r in edges] )
-    #layout = ig.layout_fruchterman_reingold( weights=["{:.2f}".format(r["edge_weight"]) for r in edges],  maxiter=1000, area=N_vertices**3, repulserad=N_vertices**3)
+    print( ig.es["weight"] )
+    print( f" is weighted {ig.is_weighted()} " )
+    # layout for not weighted graphs
+    #layout = ig.layout( "kk" )
+    ## not_working ## layout = ig.layout_fruchterman_reingold( weights=["{:.2f}".format(r["edge_weight"]) for r in edges],  maxiter=1000, area=N_vertices**3, repulserad=N_vertices**3)
     # TODO ValueError: iterable must yield numbers - Precision del float para el peso del grafo
     layout = ig.layout_fruchterman_reingold( weights=[r["edge_weight"] for r in edges],  maxiter=1000, area=N_vertices**3, repulserad=N_vertices**3)
 
@@ -108,6 +108,7 @@ def draw_igraph_domain_domain(g_domdom):
     visual_style["vertex_label_size"] = 14
     visual_style["vertex_label_dist"] = 1
     visual_style["vertex_label_angle"] = 1
+    visual_style["edge_lenght"] = 10
     visual_style["layout"] = layout
     visual_style["bbox"] = (20 * N_vertices, 20 * N_vertices)  # (600,600)
     visual_style["margin"] = 50
